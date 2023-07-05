@@ -29,12 +29,16 @@ endif()
 #add_compile_options(-fsanitize=address)
 #add_link_options(-fsanitize=address)
 
+add_library(transit-base INTERFACE)
+target_include_directories(transit-base INTERFACE transit_base/include)
+
 # Event loop and core code
 add_library(antioch-base
+  base/src/configerator.cpp
   base/src/event_loop.cpp
 )
 target_include_directories(antioch-base PUBLIC base/include/)
-
+target_link_libraries(antioch-base PRIVATE transit-base)
 # SF Muni
 add_library(sfmuni
   sfmuni/src/converter.cpp
