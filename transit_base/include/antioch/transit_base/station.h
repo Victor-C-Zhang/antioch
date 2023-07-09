@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include <nlohmann/json.hpp>
 #include <string>
 
 namespace antioch {
@@ -12,6 +13,7 @@ struct Station {
   std::string pretty_name;
   std::string fetch_url;
 };
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Station, name, pretty_name, fetch_url);
 
 }  // namespace transit_base
 }  // namespace antioch

@@ -6,6 +6,7 @@
 #include <memory>
 
 #include "types.h"
+#include "config/config.h"
 
 namespace antioch {
 namespace base {
