@@ -5,13 +5,17 @@ jobs:
     build-on-windows:
         runs-on: windows-latest
         steps:
+          - run: ls
+
           - name: Checkout Repo
             uses: actions/checkout@v3
+          - run: ls
 
           - name: Get CMake
             uses: lukka/get-cmake@latest
             
           - run: mkdir build
+          - run: ls
           - run: cd build
           - name: Set up Ninja Debug build
             run: cmake -G Ninja .. -DCMAKE_BUILD_TYPE=Debug
