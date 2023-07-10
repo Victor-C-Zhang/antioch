@@ -18,6 +18,6 @@ jobs:
           - run: ls
           - run: cd build
           - name: Set up Ninja Debug build
-            run: cmake -G Ninja .. -DCMAKE_BUILD_TYPE=Debug
+            run: cmake -G Ninja -DCMAKE_BUILD_TYPE=Debug -S . -B build
           - name: Build with Ninja
-            run: cmake --build .
+            run: cmake --build build
