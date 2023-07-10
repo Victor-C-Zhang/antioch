@@ -7,14 +7,14 @@
 #include <nlohmann/json.hpp>
 #include <vector>
 
-#include "../types.h"
+#include "antioch/base/types.h"
 
 namespace antioch {
 namespace base {
 
 class Config {
  public:
-  static void validateOrThrow(const Config* config);
+  static void validate_or_throw(const Config* config);
 
   UserMode user_mode;
   std::vector<antioch::transit_base::Station> stations;

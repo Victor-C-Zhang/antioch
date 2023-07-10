@@ -11,7 +11,7 @@ namespace antioch::base {
 using json = nlohmann::json;
 using antioch::base::Config;
 
-void Config::validateOrThrow(const Config* config) {
+void Config::validate_or_throw(const Config* config) {
   if (config->user_mode == UserMode::INVALID) {
     throw InvalidConfigException("Usermode invalid");
   }

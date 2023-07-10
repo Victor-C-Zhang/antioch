@@ -25,17 +25,16 @@ std::unique_ptr<Config> read_or_exception() {
   auto config = new Config();
   j.get_to(*config);
 
-  Config::validateOrThrow(config);
+  Config::validate_or_throw(config);
   return std::unique_ptr<Config>(config);
 }
 
-void write_or_exception(std::unique_ptr<Config> config) {
-  auto c = std::move(config);
+void write_or_exception(const Config& config) {
   const char* home_dir = getenv("HOME");
   const std::string path = std::string(home_dir) + CONFIGERATOR_FILE_PATH_FROM_HOME;
   std::fstream out;
   out.open(path, std::ios::out);
-  json j = *c.get();
+  json j = config;
   out << j;
   out.close();
 }

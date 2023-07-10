@@ -15,7 +15,7 @@ namespace Configerator {
 
 std::unique_ptr<antioch::base::Config> read_or_exception();
 
-void write_or_exception(std::unique_ptr<antioch::base::Config> config);
+void write_or_exception(const Config& config);
 
 std::unique_ptr<antioch::base::Config> default_config();
 

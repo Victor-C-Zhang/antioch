@@ -25,7 +25,7 @@ EventLoop::EventLoop() : boot_time(std::chrono::system_clock::now()) {
 
 void EventLoop::run() {
   try {
-    Configerator::write_or_exception(std::move(config));
+    Configerator::write_or_exception(*config);
   } catch (const std::exception& e) {
     std::cerr << "Exception writing config: " << e.what() << std::endl;
   }
