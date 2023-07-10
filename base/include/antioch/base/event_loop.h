@@ -5,8 +5,8 @@
 #include <chrono>
 #include <memory>
 
-#include "types.h"
 #include "config/config.h"
+#include "types.h"
 
 namespace antioch {
 namespace base {

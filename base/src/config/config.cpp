@@ -1,10 +1,11 @@
 // Copyright Antioch. All rights reserved.
 
-#include <fstream>
-
 #include "antioch/base/config/config.h"
-#include "antioch/base/constants.h"
+
+#include <fstream>
 #include <nlohmann/json.hpp>
+
+#include "antioch/base/constants.h"
 
 namespace antioch::base {
 
