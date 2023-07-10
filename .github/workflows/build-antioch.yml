@@ -1,0 +1,19 @@
+name: build-antioch
+run-name: Building Antioch
+on: [push]
+jobs:
+    build-on-windows:
+        runs-on: windows-latest
+        steps:
+          - name: Checkout Repo
+            uses: actions/checkout@v3
+
+          - name: Get CMake
+            uses: lukka/get-cmake@latest
+            
+          - run: mkdir build
+          - run: cd build
+          - name: Set up Ninja Debug build
+            run: cmake -G Ninja .. -DCMAKE_BUILD_TYPE=Debug
+          - name: Build with Ninja
+            run: cmake --build .
