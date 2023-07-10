@@ -1,14 +1,16 @@
 // Copyright Antioch. All rights reserved.
 #pragma once
 
-#include <stdexcept>
+#include <antioch/transit_base/converter.h>
 
-#include "station.h"
+#include <mutex>
+
+#include "bart_station.h"
 
 namespace antioch {
-namespace transit_base {
+namespace bart {
 
-class Converter {
+class BartConverter : public antioch::transit_base::Converter {
  public:
   /**
    * Start tracking the arrival times and lines into the desired station.
@@ -16,27 +18,26 @@ class Converter {
    * to be tracked.
    * @param station the station details to be tracked.
    */
-  virtual void startTracking(const Station& station) = 0;
+  void startTracking(const antioch::transit_base::Station& station);
 
   /**
    * Stop tracking the arrival times and lines into the station.
    * Guaranteed to be thread-safe. Does not throw.
    * @param station the station details to stop tracking.
    */
-  virtual void stopTracking(const Station& station) = 0;
+  void stopTracking(const antioch::transit_base::Station& station);
 
   /**
    * Convert the data gotten from whatever feed is specified into the proper display format.
    * @param data a (possibly binary) bytestring.
    * @return std::string
    */
-  virtual std::string convert(const std::vector<std::byte>& data) = 0;
+  std::string convert(const std::vector<std::byte>& data);
+
+ private:
+  std::vector<BartStation> stations;
+  std::mutex stations_mtx;
 };
 
-class StationTrackingException : public std::runtime_error {
- public:
-  StationTrackingException(const std::string& what) : std::runtime_error(what) {}
-};
-
-}  // namespace transit_base
+}  // namespace bart
 }  // namespace antioch
