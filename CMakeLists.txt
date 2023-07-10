@@ -29,12 +29,22 @@ endif()
 #add_compile_options(-fsanitize=address)
 #add_link_options(-fsanitize=address)
 
+FetchContent_Declare(json
+  URL https://github.com/nlohmann/json/releases/download/v3.11.2/json.tar.xz
+)
+FetchContent_MakeAvailable(json)
+
+add_library(transit-base INTERFACE)
+target_include_directories(transit-base INTERFACE transit_base/include)
+
 # Event loop and core code
 add_library(antioch-base
+  base/src/config/configerator.cpp
+  base/src/config/config.cpp
   base/src/event_loop.cpp
 )
 target_include_directories(antioch-base PUBLIC base/include/)
-
+target_link_libraries(antioch-base PRIVATE transit-base nlohmann_json::nlohmann_json)
 # SF Muni
 add_library(sfmuni
   sfmuni/src/converter.cpp
@@ -52,6 +62,7 @@ add_dependencies(antioch
 target_link_libraries(antioch PUBLIC
   antioch-base
   sfmuni
+  nlohmann_json::nlohmann_json
 )
 
 FetchContent_Declare(
