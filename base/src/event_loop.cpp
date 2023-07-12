@@ -29,7 +29,7 @@ void EventLoop::run() {
   } catch (const std::exception& e) {
     std::cerr << "Exception writing config: " << e.what() << std::endl;
   }
-  
+
   while (1) {
     run_tick();
 

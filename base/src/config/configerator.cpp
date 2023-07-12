@@ -1,11 +1,12 @@
 // Copyright Antioch. All rights reserved.
 
+#include "antioch/base/config/configerator.h"
+
 #include <cstdlib>
 #include <fstream>
-
-#include "antioch/base/config/configerator.h"
-#include "antioch/base/constants.h"
 #include <nlohmann/json.hpp>
+
+#include "antioch/base/constants.h"
 
 namespace antioch::base::Configerator {
 
@@ -43,9 +44,9 @@ std::unique_ptr<Config> default_config() {
   auto config = new Config();
   config->user_mode = UserMode::HOME_STOP;
   config->stations.push_back({
-    .name = "BART_Civic",
-    .pretty_name = "Civic Center/UN Plaza",
-    .fetch_url = "",
+      .name = "BART_Civic",
+      .pretty_name = "Civic Center/UN Plaza",
+      .fetch_url = "",
   });
   return std::unique_ptr<Config>(config);
 }
