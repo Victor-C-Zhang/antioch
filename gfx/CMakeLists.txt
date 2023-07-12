@@ -5,7 +5,6 @@ set(SRCS
 
 add_compile_options(
   -fno-exceptions
-  #-fno-rtti TODO: Consult the council on the use of RTTI
 )
 
 add_library(antioch-gfx ${SRCS})

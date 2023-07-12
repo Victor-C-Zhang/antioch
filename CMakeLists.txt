@@ -26,6 +26,8 @@ else()
   message(STATUS "${CMAKE_CXX_COMPILER_ID} not recognized, no flags added")
 endif()
 
+add_compile_options(-fno-rtti)
+
 #add_compile_options(-fsanitize=address)
 #add_link_options(-fsanitize=address)
 

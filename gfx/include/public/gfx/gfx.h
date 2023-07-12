@@ -4,7 +4,7 @@
 
 #define GFX_API [[nodiscard]]
 
-namespace gfx {
+namespace antioch::gfx {
 enum class Result {
   Success,
   InvalidParameter,
@@ -15,4 +15,4 @@ enum class Result {
 GFX_API Result createDevice();
 GFX_API Result createFramebuffer();
 
-}  // namespace gfx
+}  // namespace antioch::gfx
