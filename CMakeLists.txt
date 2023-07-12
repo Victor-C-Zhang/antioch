@@ -151,7 +151,12 @@ target_link_libraries(antioch-base-test PUBLIC
   gtest
 )
 include(GoogleTest)
+# Windows environment on GitHub Actions is quirky
+if (DEFINED ENV{GITHUB_ACTIONS} AND WIN32)
+gtest_add_tests(antioch-base-test)
+else()
 gtest_discover_tests(antioch-base-test)
+endif()
 
 ###############################################################
 ########################## Utilities ##########################
@@ -160,3 +165,4 @@ gtest_discover_tests(antioch-base-test)
 add_executable(moonlight-vigil
   moonlight_vigil/main.cpp
 )
+
