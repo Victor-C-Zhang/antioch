@@ -1,7 +1,6 @@
 
-set(SRCS
-  src/main.cpp
-)
+FILE(GLOB SRCS src/*.cpp)
+
 
 add_compile_options(
   -fno-exceptions
