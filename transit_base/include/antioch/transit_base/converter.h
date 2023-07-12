@@ -30,7 +30,7 @@ class Converter {
    * @param data a (possibly binary) bytestring.
    * @return std::string
    */
-  virtual std::string convert(const std::vector<std::byte>& data) = 0;
+  virtual std::vector<std::pair<antioch::transit_base::Station, std::vector<std::pair<TrainDescription, int64_t>>>> convert(const std::vector<std::byte>& data) = 0;
 };
 
 class StationTrackingException : public std::runtime_error {
