@@ -28,6 +28,15 @@ endif()
 
 add_compile_options(-fno-rtti)
 
+enable_testing()
+FetchContent_Declare(
+  googletest
+  GIT_REPOSITORY https://github.com/google/googletest.git
+  GIT_TAG        release-1.11.0
+)
+
+FetchContent_MakeAvailable(googletest)
+
 #add_compile_options(-fsanitize=address)
 #add_link_options(-fsanitize=address)
 
@@ -133,9 +142,10 @@ target_include_directories(antioch-base-test PUBLIC
 )
 target_link_libraries(antioch-base-test PUBLIC
   antioch-base
-  GTest::gtest_main
-  GTest::gmock_main
+  gtest
 )
+include(GoogleTest)
+gtest_discover_tests(antioch-base-test)
 
 ###############################################################
 ########################## Utilities ##########################
