@@ -1,5 +1,5 @@
-name: build-antioch
-run-name: Building Antioch
+name: build-and-test-antioch
+run-name: Building And Testing Antioch
 on: [push]
 jobs:
     build-on-windows:
@@ -18,3 +18,6 @@ jobs:
             run: cmake -G Ninja -DCMAKE_BUILD_TYPE=Debug -S . -B build
           - name: Build with Ninja
             run: cmake --build build
+
+          - name: Running Antioch Base Tests
+            run: ./build/antioch-base-test.exe
