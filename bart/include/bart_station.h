@@ -60,6 +60,19 @@ enum StationIdentifier : int {
   SFIA = 50,   // San Francisco International Airport
 };
 
+std::string StationIdentifier_Name(const StationIdentifier id) {
+  switch (id) {
+    case BALB: return "BALB";
+    case MLPT: return "MLPT";
+    case DELN: return "DELN";
+    case PITT: return "PITT";
+    case SBRN: return "SBRN";
+    case MLBR: return "MLBR";
+    case WDUB: return "WDUB";
+    case PCTR: return "PCTR";
+  }
+}
+
 class BartStation : public antioch::transit_base::Station {
  public:
   BartStation(StationIdentifier id);

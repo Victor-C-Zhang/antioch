@@ -2,10 +2,12 @@
 #pragma once
 
 #include <antioch/transit_base/converter.h>
+#include <gtfs-realtime.pb.h>
 
 #include <mutex>
 
 #include "bart_station.h"
+#include "train_description.h"
 
 namespace antioch {
 namespace bart {
@@ -35,8 +37,15 @@ class BartConverter : public antioch::transit_base::Converter {
   std::string convert(const std::vector<std::byte>& data);
 
  private:
+  TrainDescription line_of(const transit_realtime::TripUpdate& tu);
+
   std::vector<BartStation> stations;
   std::mutex stations_mtx;
+};
+
+class InvariantViolation : public std::runtime_error {
+ public:
+  InvariantViolation(const std::string& what) : std::runtime_error(what) {}
 };
 
 }  // namespace bart
