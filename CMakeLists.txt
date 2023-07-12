@@ -99,7 +99,7 @@ target_link_libraries(antioch-base-test PUBLIC
 include(GoogleTest)
 # Windows environment on GitHub Actions is quirky
 if (DEFINED ENV{GITHUB_ACTIONS} AND WIN32)
-gtest_add_tests(antioch-base-test)
+gtest_add_tests(TARGET antioch-base-test)
 else()
 gtest_discover_tests(antioch-base-test)
 endif()
