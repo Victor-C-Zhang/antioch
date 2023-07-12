@@ -20,4 +20,4 @@ jobs:
             run: cmake --build build
 
           - name: Running Antioch Base Tests
-            run: ./build/antioch-base-test.exe
+            run: ctest --test-dir build

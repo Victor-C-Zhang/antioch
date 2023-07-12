@@ -65,6 +65,12 @@ FetchContent_MakeAvailable(googletest)
 FetchContent_Declare(json
 URL https://github.com/nlohmann/json/releases/download/v3.11.2/json.tar.xz
 )
+
+# For Windows: Prevent overriding the parent project's compiler/linker settings
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+  set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+endif()
+
 FetchContent_MakeAvailable(json)
 
 set(protobuf_BUILD_TESTS OFF)
@@ -142,7 +148,7 @@ target_include_directories(antioch-base-test PUBLIC
 )
 target_link_libraries(antioch-base-test PUBLIC
   antioch-base
-  gtest
+  GTest::gtest_main
 )
 include(GoogleTest)
 gtest_discover_tests(antioch-base-test)
