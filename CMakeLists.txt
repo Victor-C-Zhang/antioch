@@ -94,7 +94,7 @@ target_include_directories(antioch-base-test PUBLIC
 )
 target_link_libraries(antioch-base-test PUBLIC
   antioch-base
-  GTest::gtest_main
+  gtest
 )
 include(GoogleTest)
 gtest_discover_tests(antioch-base-test)
