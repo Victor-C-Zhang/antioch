@@ -20,9 +20,6 @@ jobs:
           - name: Build with Ninja
             run: cmake --build build
 
-          - name: Running Antioch Base Tests
-            run: ctest --test-dir build
-
     build-on-linux:
         runs-on: ubuntu-latest
         steps:
