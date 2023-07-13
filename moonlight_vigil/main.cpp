@@ -33,8 +33,9 @@ std::string exec(const char* cmd) {
  *            the format of the file should be as follows:
  *              one line with a single integer, the number n of timestamps to test on, followed by
  *              n lines each with a single unix timestamp
- *          - a fully qualified path out_dir a directory in which to put the wget and conversion results
- * 
+ *          - a fully qualified path out_dir a directory in which to put the wget and conversion
+ *            results
+ *
  *        Sample usage: ./moonlight-vigil /home/user/timestamps.txt /home/user/results
  */
 int main(int argc, char** argv) {
@@ -47,7 +48,8 @@ int main(int argc, char** argv) {
 
   std::ifstream ts_file{ts_file_path};
   std::vector<int64_t> ts;
-  int n; ts_file >> n;
+  int n;
+  ts_file >> n;
   int64_t ts_temp;
   while (n--) {
     ts_file >> ts_temp;
