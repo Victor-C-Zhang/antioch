@@ -148,7 +148,7 @@ target_include_directories(antioch-base-test PUBLIC
 )
 target_link_libraries(antioch-base-test PUBLIC
   antioch-base
-  gtest
+  GTest::gtest_main
 )
 include(GoogleTest)
 # Windows environment on GitHub Actions is quirky
@@ -165,4 +165,3 @@ endif()
 add_executable(moonlight-vigil
   moonlight_vigil/main.cpp
 )
-
