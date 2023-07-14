@@ -1,0 +1,43 @@
+name: build-and-test-antioch
+run-name: Building And Testing Antioch
+on: [push]
+
+jobs:
+    build-on-windows:
+        runs-on: windows-latest
+        steps:
+          - name: Checkout Repo
+            uses: actions/checkout@v3
+
+          - name: Get CMake
+            uses: lukka/get-cmake@latest
+
+          - run: |
+              mkdir build
+              cd build
+
+          - name: Set up Ninja Debug build
+            run: cmake -G Ninja -DCMAKE_BUILD_TYPE=Debug -S . -B build
+          - name: Build with Ninja
+            run: cmake --build build
+
+    build-on-linux:
+        runs-on: ubuntu-latest
+        steps:
+          - name: Checkout Repo
+            uses: actions/checkout@v3
+
+          - name: Get CMake
+            uses: lukka/get-cmake@latest
+
+          - run: |
+              mkdir build
+              cd build
+
+          - name: Set up Ninja Debug build
+            run: cmake -G Ninja -DCMAKE_BUILD_TYPE=Debug -S . -B build
+          - name: Build with Ninja
+            run: cmake --build build
+
+          - name: Running Antioch Base Tests
+            run: ctest --test-dir build
