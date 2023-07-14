@@ -3,17 +3,30 @@
 #pragma once
 
 #include <nlohmann/json.hpp>
-#include <string>
+
+#include "transit_agency.h"
 
 namespace antioch {
 namespace transit_base {
 
-struct Station {
-  std::string name;
-  std::string pretty_name;
-  std::string fetch_url;
+class Station {
+ public:
+  Station(TransitAgency agency, int id) : agency_(agency), id_(id) {}
+  Station() : agency_(TransitAgency::INVALID), id_(0) {}
+
+  virtual ~Station() = default;
+  bool operator==(const Station& other) const {
+    return agency_ == other.agency_ && id_ == other.id_;
+  }
+  TransitAgency agency() const { return agency_; }
+  int id() const { return id_; }
+
+ protected:
+  TransitAgency agency_;
+  int id_;
+
+  NLOHMANN_DEFINE_TYPE_INTRUSIVE(Station, agency_, id_);
 };
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Station, name, pretty_name, fetch_url);
 
 }  // namespace transit_base
 }  // namespace antioch
