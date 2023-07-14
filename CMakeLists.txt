@@ -94,3 +94,11 @@ target_link_libraries(antioch-base-test PUBLIC
   GTest::gtest_main
   GTest::gmock_main
 )
+
+###############################################################
+########################## Utilities ##########################
+###############################################################
+
+add_executable(moonlight-vigil
+  moonlight_vigil/main.cpp
+)
