@@ -29,14 +29,14 @@ std::string exec(const char* cmd) {
 /**
  * @brief Schedule a cron-like job to run web queries and test your converter throughout the day
  *        or night. Takes 2 parameters:
- *          - a FULLY QUALIFIED path ts_file to a list of unix timestamps to run your converter on.
+ *          - a path ts_file to a list of unix timestamps to run your converter on.
  *            the format of the file should be as follows:
  *              one line with a single integer, the number n of timestamps to test on, followed by
  *              n lines each with a single unix timestamp
- *          - a fully qualified path out_dir a directory in which to put the wget and conversion
+ *          - a path out_dir a directory in which to put the wget and conversion
  *            results
  *
- *        Sample usage: ./moonlight-vigil /home/user/timestamps.txt /home/user/results
+ *        Sample usage: ./moonlight-vigil /home/user/timestamps.txt ./results
  */
 int main(int argc, char** argv) {
   if (argc != 3) {
