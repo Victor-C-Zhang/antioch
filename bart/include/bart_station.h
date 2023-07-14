@@ -76,7 +76,9 @@ std::string StationIdentifier_Name(const StationIdentifier id) {
 class BartStation : public antioch::transit_base::Station {
  public:
   BartStation(StationIdentifier id);
-  bool operator==(const BartStation& other);
+  BartStation(const Station& station);
+  
+  std::string pretty_name() const;
 };
 
 }  // namespace bart

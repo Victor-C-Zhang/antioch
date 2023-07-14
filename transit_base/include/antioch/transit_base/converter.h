@@ -26,11 +26,18 @@ class Converter {
   virtual void stopTracking(const Station& station) = 0;
 
   /**
-   * Convert the data gotten from whatever feed is specified into the proper display format.
-   * @param data a (possibly binary) bytestring.
-   * @return std::string
+   * Get the stringified version of the arrivals data for the given station.
+   * This data need not be current, or even correct. It may be cached or even made up.
+   * @param station the station to query.
+   * @throw StationGetException in error cases.
+   * @return std::string 
    */
-  virtual std::vector<std::pair<antioch::transit_base::Station, std::vector<std::pair<TrainDescription, int64_t>>>> convert(const std::vector<std::byte>& data) = 0;
+  virtual std::string get(const antioch::transit_base::Station& station) = 0;
+};
+
+class StationGetException : public std::runtime_error {
+ public:
+  StationGetException(const std::string& what) : std::runtime_error(what) {}
 };
 
 class StationTrackingException : public std::runtime_error {

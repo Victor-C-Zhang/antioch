@@ -12,6 +12,8 @@
 namespace antioch {
 namespace base {
 
+using antioch::transit_base::Station;
+
 class Config {
  public:
   static void validate_or_throw(const Config* config);

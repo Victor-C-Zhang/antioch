@@ -11,37 +11,106 @@
 namespace antioch::bart {
 
 using antioch::transit_base::Station;
+using antioch::transit_base::StationGetException;
 using antioch::transit_base::StationTrackingException;
 using namespace transit_realtime;
 
+BartConverter::BartConverter() : last_fetch(std::chrono::system_clock::now()) {}
+
 void BartConverter::startTracking(const Station& station) {
-  try {
-    const BartStation& cast_station = dynamic_cast<const BartStation&>(station);
-    {
-      std::scoped_lock<std::mutex> l(stations_mtx);
-      stations.push_back({cast_station});
-    }
-  } catch (const std::bad_cast& e) {
-    throw StationTrackingException(e.what());
-    // throw StationTrackingException("Requested station is not a BART station");
+  if (station.agency() != antioch::transit_base::TransitAgency::BART) {
+    throw StationTrackingException("Requested station is not a BART station");
+  }
+  {
+    std::scoped_lock<std::mutex> l(stations_mtx);
+    stations.emplace_back((StationIdentifier)station.id());
+    // TODO: force refresh
   }
 }
 
 void BartConverter::stopTracking(const Station& station) {
-  try {
-    const BartStation& cast_station = dynamic_cast<const BartStation&>(station);
-    {
-      std::scoped_lock<std::mutex> l(stations_mtx);
-      for (unsigned i = 0; i < stations.size(); ++i) {
-        if (stations[i] == cast_station) {
-          stations.erase(stations.begin() + i);
-        }
+  if (station.agency() != antioch::transit_base::TransitAgency::BART) {
+    throw StationTrackingException("Requested station is not a BART station");
+  }
+  {
+    std::scoped_lock<std::mutex> l(stations_mtx);
+    for (unsigned i = 0; i < stations.size(); ++i) {
+      if ((Station)stations[i] == station) {
+        stations.erase(stations.begin() + i);
       }
     }
-  } catch (const std::bad_cast& e) {
-    throw StationTrackingException(e.what());
-    // throw StationTrackingException("Requested station is not a BART station");
+    // TODO: remove from cache
   }
+}
+
+std::string BartConverter::get(const Station& station) {
+  if (station.agency() != antioch::transit_base::TransitAgency::BART) {
+    throw StationTrackingException("Requested station is not a BART station");
+  }
+  auto now = std::chrono::system_clock::now();
+  if (now - last_fetch >= std::chrono::seconds(refreshTimeSecs)) {
+    update_last_fetch(now);
+
+    // TODO fetch from wifi
+    std::vector<std::byte> e;
+    auto converted = convert(e);
+    cache.swap(converted);
+  }
+  for (const auto& arrivals : cache) {
+    if (station == arrivals.station()) {
+      return arrivals.to_string();
+    }
+  }
+  // fallthrough
+  const BartStation bStation(station);
+  std::string msg = "Not currently tracking station " + bStation.pretty_name();
+  throw StationGetException(msg);
+}
+
+std::vector<StationArrivals> BartConverter::convert(const std::vector<std::byte>& data) {
+  FeedMessage fm;
+  fm.ParseFromArray(data.data(), data.size());
+  auto feed_header = fm.header();
+  if (feed_header.gtfs_realtime_version() != "1.0") {
+    std::string msg = "Expected gtfs_realtime_version 1.0 but got " + feed_header.gtfs_realtime_version();
+    throw InvariantViolation(msg);
+  }
+  if (feed_header.incrementality() != FeedHeader_Incrementality::FeedHeader_Incrementality_FULL_DATASET) {
+    std::string msg = "Expected incrementality FULL_DATASET but got " + FeedHeader_Incrementality_Name(feed_header.incrementality());
+    throw InvariantViolation(msg);
+  }
+  for (int i = 0; i < fm.entity_size(); ++i) {
+    if (!fm.entity(i).has_trip_update()) {
+      throw InvariantViolation("Feed entity does not have a trip_update object");
+    }
+  }
+
+  {
+    std::scoped_lock<std::mutex> l(stations_mtx);
+    std::vector<StationArrivals> trains;
+    for (int i = 0; i < stations.size(); ++i) {
+      std::vector<TrainArrival> arrival_vec;
+      for (int j = 0; j < fm.entity_size(); ++j) {
+        const auto& trip_update = fm.entity(i).trip_update();
+        const TrainDescription line = line_of(trip_update);
+        for (int k = 0; k < trip_update.stop_time_update_size(); ++k) {
+          const auto& stop = trip_update.stop_time_update(k);
+          if (StationIdentifier_Name((StationIdentifier)(stations[i].id())) == stop.stop_id()) {
+            arrival_vec.push_back({line, stop.arrival().time()});
+          }
+        }
+      }
+      trains.emplace_back(stations[i], std::move(arrival_vec));
+    }
+    return trains;
+  }
+}
+
+void BartConverter::update_last_fetch(std::chrono::time_point<std::chrono::system_clock>& now) {
+  while (now > last_fetch) {
+    last_fetch += std::chrono::seconds(refreshTimeSecs);
+  }
+  last_fetch -= std::chrono::seconds(refreshTimeSecs);
 }
 
 TrainDescription BartConverter::line_of(const TripUpdate& tu) {
@@ -105,48 +174,6 @@ TrainDescription BartConverter::line_of(const TripUpdate& tu) {
   std::string msg = "Unexpected line terminus combo: " + second_to_last_stop.stop_id()
                     + ", seq_num " + std::to_string((int)second_to_last_stop.stop_sequence());
   throw InvariantViolation(msg);
-}
-
-std::vector<std::pair<Station, std::vector<std::pair<TrainDescription, int64_t>>>> BartConverter::convert(const std::vector<std::byte>& data) {
-  FeedMessage fm;
-  fm.ParseFromArray(data.data(), data.size());
-  auto feed_header = fm.header();
-  if (feed_header.gtfs_realtime_version() != "1.0") {
-    std::string msg = "Expected gtfs_realtime_version 1.0 but got " + feed_header.gtfs_realtime_version();
-    throw InvariantViolation(msg);
-  }
-  if (feed_header.incrementality() != FeedHeader_Incrementality::FeedHeader_Incrementality_FULL_DATASET) {
-    std::string msg = "Expected incrementality FULL_DATASET but got " + FeedHeader_Incrementality_Name(feed_header.incrementality());
-    throw InvariantViolation(msg);
-  }
-
-  {
-    std::scoped_lock<std::mutex> l(stations_mtx);
-    const int n = fm.entity_size();
-    std::vector<std::pair<Station, std::vector<std::pair<TrainDescription, int64_t>>>> trains(stations.size());
-    for (int i = 0; i < stations.size(); ++i) {
-      trains[i].first = stations[i];
-    }
-    for (int i = 0; i < n; ++i) {
-      const auto& fe = fm.entity(i);
-      if (!fe.has_trip_update()) {
-        throw InvariantViolation("Feed entity does not have a trip_update object");
-      }
-      const auto& trip_update = fe.trip_update();
-      TrainDescription line = line_of(trip_update);
-      for (int i = 0; i < stations.size(); ++i) {
-        const auto& station = stations[i];
-        int n = trip_update.stop_time_update_size();
-        for (int j = 0; j < n; ++i) {
-          const auto& stop = trip_update.stop_time_update(j);
-          if (StationIdentifier_Name((StationIdentifier)station.station_id) == stop.stop_id()) {
-            trains[i].second.push_back({line, stop.arrival().time()});
-          }
-        }
-      }
-    }  // moonlight vigil
-  }
-  return trains;
 }
 
 }  // namespace antioch::bart

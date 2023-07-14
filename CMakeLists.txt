@@ -102,6 +102,7 @@ target_include_directories(sfmuni PUBLIC sfmuni/include transit_base/include)
 add_library(bart
   bart/src/bart_converter.cpp
   bart/src/bart_station.cpp
+  bart/src/station_arrivals.cpp
 )
 target_include_directories(bart PRIVATE bart/include)
 target_link_libraries(bart PRIVATE transit-base proto-objs)

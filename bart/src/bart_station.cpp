@@ -2,15 +2,20 @@
 
 #include "bart_station.h"
 
+#include "bart_converter.h"
+
 namespace antioch::bart {
 
-BartStation::BartStation(StationIdentifier id) {
-  agency = antioch::transit_base::TransitAgency::BART;
-  station_id = id;
+BartStation::BartStation(StationIdentifier id) : Station(antioch::transit_base::TransitAgency::BART, id) {}
+
+BartStation::BartStation(const Station& station) : BartStation((StationIdentifier)station.id()) {
+  if (station.agency() != antioch::transit_base::TransitAgency::BART) {
+    throw InvariantViolation("Station is not a BART station");
+  }
 }
 
-bool BartStation::operator==(const BartStation& other) {
-  return station_id == other.station_id;
+std::string BartStation::pretty_name() const {
+  return "TODO";
 }
 
 }  // namespace antioch::bart
