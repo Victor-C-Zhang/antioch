@@ -36,20 +36,20 @@ jobs:
 
       - name: Download ccache
         id: ccache
-        shell: cmake -P {0}
+        shell: bash
         run: |
-          set(ccache_url "https://github.com/ccache/ccache/releases/download/v4.8.2/ccache-4.8.2-linux-x86_64.tar.xz")
-          file(DOWNLOAD "${ccache_url}" ./ccache.tar.xz SHOW_PROGRESS)
-          execute_process(COMMAND ${CMAKE_COMMAND} -E tar xvf ./ccache.tar.xz)
+          curl https://github.com/ccache/ccache/releases/download/v4.8.2/ccache-4.8.2-linux-x86_64.tar.xz --output ccache.tar.xz
+          tar xvf ./ccache.tar.xz
           
       - name: Add ccache to path
         shell: bash
         run: |
-          echo "./ccache-4.8.2-linux-x86_64" >> $GITHUB_PATH
-          echo "$PATH"
-          echo "$GITHUB_PATH"
+          echo "$GITHUB_WORKSPACE/ccache-4.8.2-linux-x86_64" >> $GITHUB_PATH
 
-
+      - name: Test env
+        shell: bash
+        run: |
+            echo $PATH
 
       - name: Prepare ccache timestamp
         id: ccache_cache_timestamp
