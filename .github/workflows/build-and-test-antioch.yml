@@ -34,8 +34,16 @@ jobs:
       - name: Download CMake and Ninja
         uses: lukka/get-cmake@latest
 
+      - name: Cache ccache binary
+        id: cache-ccache-bin
+        uses: actions/cache@v3
+        with:
+          path: "$GITHUB_WORKSPACE/ccache-4.8.2-linux-x86_64"
+          key: ${{ matrix.config.name }}-bin-ccache
+
       - name: Download ccache
         id: ccache
+        if: steps.cache-ccache-bin.outputs.cache-hit != 'true'
         shell: cmake -P {0}
         run: |
           set(ccache_url "https://github.com/ccache/ccache/releases/download/v4.8.2/ccache-4.8.2-linux-x86_64.tar.xz")
@@ -46,11 +54,6 @@ jobs:
         shell: bash
         run: |
           echo "$GITHUB_WORKSPACE/ccache-4.8.2-linux-x86_64" >> $GITHUB_PATH
-
-      - name: Test env
-        shell: bash
-        run: |
-            echo $PATH
 
       - name: Prepare ccache timestamp
         id: ccache_cache_timestamp
