@@ -9,7 +9,6 @@
 
 #include "train_description.h"
 
-
 namespace antioch::bart {
 
 using antioch::transit_base::Station;
