@@ -36,7 +36,7 @@ jobs:
 
       - name: Download ccache
         id: ccache
-        shell: bash
+        shell: cmake -P {0}
         run: |
           set(ccache_url "https://github.com/ccache/ccache/releases/download/v4.8.2/ccache-4.8.2-linux-x86_64.tar.xz")
           file(DOWNLOAD "${ccache_url}" ./ccache.tar.xz SHOW_PROGRESS)
