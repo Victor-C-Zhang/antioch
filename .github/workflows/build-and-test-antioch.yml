@@ -38,7 +38,7 @@ jobs:
         id: cache-ccache-bin
         uses: actions/cache@v3
         with:
-          path: "$GITHUB_WORKSPACE/ccache-4.8.2-linux-x86_64"
+          path: "ccache-4.8.2-linux-x86_64"
           key: ${{ matrix.config.name }}-bin-ccache
 
       - name: Download ccache
