@@ -44,7 +44,11 @@ jobs:
           
       - name: Add ccache to path
         shell: bash
-        run: echo "./ccache-4.8.2-linux-x86_64" >> $GITHUB_PATH
+        run: |
+          echo "./ccache-4.8.2-linux-x86_64" >> $GITHUB_PATH
+          echo "$PATH"
+          echo "$GITHUB_PATH"
+
 
 
       - name: Prepare ccache timestamp
