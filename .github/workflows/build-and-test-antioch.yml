@@ -3,41 +3,75 @@ run-name: Building And Testing Antioch
 on: [push]
 
 jobs:
-    build-on-windows:
-        runs-on: windows-latest
-        steps:
-          - name: Checkout Repo
-            uses: actions/checkout@v3
+  build:
+    name: ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+        - {
+          name: "Windows Latest Release MinGW",
+          os: windows-latest,
+          build_type: "Release", cc: "gcc", cxx: "g++"
+        }
+        - {
+          name: "Ubuntu Latest Release GCC",
+          os: ubuntu-latest,
+          build_type: "Release", cc: "gcc", cxx: "g++"
+        }
+        - {
+          name: "Ubuntu Latest Debug GCC",
+          os: ubuntu-latest,
+          build_type: "Debug", cc: "gcc", cxx: "g++"
+        }
 
-          - name: Get CMake
-            uses: lukka/get-cmake@latest
+    steps:
+      - uses: actions/checkout@v3
 
-          - run: |
-              mkdir build
-              cd build
+      - uses: lukka/get-cmake@latest
+    
+      - name: Configure
+        shell: cmake -P {0}
+        run: |
+          set(ENV{CC} ${{ matrix.config.cc }})
+          set(ENV{CXX} ${{ matrix.config.cxx }})
+        
+          execute_process(
+            COMMAND cmake
+            -S .
+            -B build
+            -D CMAKE_BUILD_TYPE=${{ matrix.config.build_type }}
+            -G Ninja
+          RESULT_VARIABLE result
+          )
+          if (NOT result EQUAL 0)
+            message(FATAL_ERROR "Bad exit status")
+          endif()
 
-          - name: Set up Ninja Debug build
-            run: cmake -G Ninja -DCMAKE_BUILD_TYPE=Debug -S . -B build
-          - name: Build with Ninja
-            run: cmake --build build
+      - name: Build
+        run: |
+          set(ENV{NINJA_STATUS} "[%f/%t %o/sec] ")
+  
+          execute_process(
+            COMMAND cmake --build build
+            RESULT_VARIABLE result
+          )
+          if (NOT result EQUAL 0)
+            message(FATAL_ERROR "Bad exit status")
+          endif()
 
-    build-on-linux:
-        runs-on: ubuntu-latest
-        steps:
-          - name: Checkout Repo
-            uses: actions/checkout@v3
+      - name: Test
+        shell: cmake -P {0}
+        run: |
+          include(ProcessorCount)
+          ProcessorCount(N)
 
-          - name: Get CMake
-            uses: lukka/get-cmake@latest
-
-          - run: |
-              mkdir build
-              cd build
-
-          - name: Set up Ninja Debug build
-            run: cmake -G Ninja -DCMAKE_BUILD_TYPE=Debug -S . -B build
-          - name: Build with Ninja
-            run: cmake --build build
-
-          - name: Running Antioch Base Tests
-            run: ctest --test-dir build
+          execute_process(
+            COMMAND ctest -j ${N}
+            WORKING_DIRECTORY build
+            RESULT_VARIABLE result
+          )
+          if (NOT result EQUAL 0)
+            message(FATAL_ERROR "Running tests failed!")
+          endif()
