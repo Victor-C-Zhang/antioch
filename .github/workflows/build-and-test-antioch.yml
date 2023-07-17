@@ -50,6 +50,7 @@ jobs:
           endif()
 
       - name: Build
+        shell: cmake -P {0}
         run: |
           set(ENV{NINJA_STATUS} "[%f/%t %o/sec] ")
   
