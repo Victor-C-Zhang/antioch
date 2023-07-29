@@ -53,6 +53,18 @@ endif()
 
 FetchContent_MakeAvailable(json)
 
+###############################################################
+########################## Libraries ##########################
+###############################################################
+
+# Non-blocking curl
+add_library(curl-transfer
+  connectivity/curl/src/transfer.cpp
+)
+target_include_directories(curl-transfer PRIVATE connectivity/curl/include)
+target_link_libraries(curl-transfer PUBLIC curl)
+
+# Base transit boilerplate
 add_library(transit-base INTERFACE)
 target_include_directories(transit-base INTERFACE transit_base/include)
 
@@ -82,6 +94,20 @@ target_link_libraries(antioch PUBLIC
   antioch-base
   sfmuni
   nlohmann_json::nlohmann_json
+)
+
+###############################################################
+############################ Tests ############################
+###############################################################
+
+add_executable(curl-transfer-test
+  connectivity/curl/test/test_runner.cpp
+)
+add_dependencies(curl-transfer-test curl-transfer)
+target_link_libraries(curl-transfer-test PUBLIC
+  curl-transfer
+  GTest::gtest_main
+  GTest::gmock_main
 )
 
 add_executable(antioch-base-test
