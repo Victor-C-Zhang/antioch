@@ -48,7 +48,17 @@ class BartConverter : public antioch::transit_base::Converter {
    * Increment last_fetch by REFRESH_TIME_SECS s.t. it is the greatest value less or equal to now.
    * 
    */
-  void update_last_fetch(std::chrono::time_point<std::chrono::system_clock>& now);
+  void update_last_fetch(const std::chrono::time_point<std::chrono::system_clock>& now);
+
+  /**
+   * Refresh the cache with newly fetched transit info.
+   * Queries the backend API via wifi.
+   * Converts and stores the new data in cache.
+   * Updates the last_fetch timestamp.
+   * @param now the timestamp "now" to update the timestamp with.
+   * @throws exception if wifi fetch or conversion fails.
+   */
+  void refresh_cache(const std::chrono::time_point<std::chrono::system_clock>& now);
   
   TrainDescription line_of(const transit_realtime::TripUpdate& tu);
 

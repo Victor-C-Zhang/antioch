@@ -24,7 +24,7 @@ void BartConverter::startTracking(const Station& station) {
   {
     std::scoped_lock<std::mutex> l(stations_mtx);
     stations.emplace_back((StationIdentifier)station.id());
-    // TODO: force refresh
+    refresh_cache(std::chrono::system_clock::now());
   }
 }
 
@@ -37,9 +37,9 @@ void BartConverter::stopTracking(const Station& station) {
     for (unsigned i = 0; i < stations.size(); ++i) {
       if ((Station)stations[i] == station) {
         stations.erase(stations.begin() + i);
+        cache.erase(cache.begin() + i);
       }
     }
-    // TODO: remove from cache
   }
 }
 
@@ -47,18 +47,16 @@ std::string BartConverter::get(const Station& station) {
   if (station.agency() != antioch::transit_base::TransitAgency::BART) {
     throw StationTrackingException("Requested station is not a BART station");
   }
-  auto now = std::chrono::system_clock::now();
-  if (now - last_fetch >= std::chrono::seconds(refreshTimeSecs)) {
-    update_last_fetch(now);
-
-    // TODO fetch from wifi
-    std::vector<std::byte> e;
-    auto converted = convert(e);
-    cache.swap(converted);
-  }
-  for (const auto& arrivals : cache) {
-    if (station == arrivals.station()) {
-      return arrivals.to_string();
+  {
+    std::scoped_lock<std::mutex> l(stations_mtx);
+    auto now = std::chrono::system_clock::now();
+    if (now - last_fetch >= std::chrono::seconds(refreshTimeSecs)) {
+      refresh_cache(now);
+    }
+    for (const auto& arrivals : cache) {
+      if (station == arrivals.station()) {
+        return arrivals.to_string();
+      }
     }
   }
   // fallthrough
@@ -106,11 +104,20 @@ std::vector<StationArrivals> BartConverter::convert(const std::vector<std::byte>
   }
 }
 
-void BartConverter::update_last_fetch(std::chrono::time_point<std::chrono::system_clock>& now) {
+void BartConverter::update_last_fetch(const std::chrono::time_point<std::chrono::system_clock>& now) {
   while (now > last_fetch) {
     last_fetch += std::chrono::seconds(refreshTimeSecs);
   }
   last_fetch -= std::chrono::seconds(refreshTimeSecs);
+}
+
+void BartConverter::refresh_cache(const std::chrono::time_point<std::chrono::system_clock>& now) {
+  update_last_fetch(now);
+
+  // TODO fetch from wifi
+  std::vector<std::byte> e;
+  auto converted = convert(e);
+  cache.swap(converted);
 }
 
 TrainDescription BartConverter::line_of(const TripUpdate& tu) {
