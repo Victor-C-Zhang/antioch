@@ -59,6 +59,7 @@ FetchContent_MakeAvailable(json)
 
 # Non-blocking curl
 add_library(curl-transfer
+connectivity/curl/src/multi_performer.cpp
   connectivity/curl/src/transfer.cpp
 )
 target_include_directories(curl-transfer PRIVATE connectivity/curl/include)
