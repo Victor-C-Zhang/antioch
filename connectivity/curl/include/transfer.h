@@ -2,22 +2,20 @@
 
 #pragma once
 
+#include <memory>
 #include <string>
 
 namespace antioch {
 namespace connectivity {
 namespace curl_transfer {
 
-void curl_init_internal();
-void curl_destruct_internal();
-
 /**
  * Initiate an async curl transfer.
  * 
  * @param url the url to curl
- * @param write_cb a function that writes data
+ * @param write_cb a function that takes as input the read data
  */
-void start_transfer(const std::string& url, size_t (*write_cb)(char* ptr, size_t size, size_t nmemb, void* userdata));
+void start_transfer(const std::string& url, void (*cb)(std::unique_ptr<char>));
 
 class LibCurlInternalException : public std::runtime_error {
  public:

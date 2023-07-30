@@ -6,25 +6,28 @@
 
 #include <condition_variable>
 #include <memory>
+#include <map>
 #include <mutex>
-#include <vector>
 
 namespace antioch {
 namespace connectivity {
 namespace curl_transfer {
 
+typedef struct {
+  void (*finish_cb)(std::unique_ptr<char>);
+  char* buf;
+} EasyObj;
+
 class MultiPerformer {
  public:
-  MultiPerformer(CURLM* multi_handle) : multi_handle(multi_handle) {}
-  ~MultiPerformer();
+  MultiPerformer(CURLM* multi_handle);
+  virtual ~MultiPerformer();
 
   /**
    * Queues the transfer. The function will return immediately, but the transfer will happen in the
-   * background.
-   * Implementation detail: takes ownership of the passed easy_handle object and frees it after the
-   * transfer is complete.
+   * background. The finish_cb will be called when the transfer is finished or errors out.
    */
-  void queue_transfer(std::unique_ptr<CURL> easy_handle);
+  void queue_transfer(CURL* easy_handle, void (*finish_cb)(std::unique_ptr<char>));
 
  private:
   void run();
@@ -35,7 +38,7 @@ class MultiPerformer {
   std::mutex mtx;  // synchronizes all the below objects
   std::condition_variable cv;
   bool flag = false;
-  std::vector<std::unique_ptr<CURL>> handle_objs;
+  std::map<CURL*, EasyObj> handle_objs;
 };
 
 }  // namespace curl_transfer
