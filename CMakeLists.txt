@@ -102,9 +102,15 @@ target_link_libraries(antioch PUBLIC
 ###############################################################
 
 add_executable(curl-transfer-test
-  connectivity/curl/test/test_runner.cpp
+  connectivity/curl/test/e2e.cpp
+  # connectivity/curl/test/test_runner.cpp
+  base/test/test_runner.cpp
+
 )
 add_dependencies(curl-transfer-test curl-transfer)
+target_include_directories(curl-transfer-test PUBLIC
+  connectivity/curl/include
+)
 target_link_libraries(curl-transfer-test PUBLIC
   curl-transfer
   GTest::gtest_main
@@ -112,6 +118,7 @@ target_link_libraries(curl-transfer-test PUBLIC
 )
 
 add_executable(antioch-base-test
+  base/test/trivial_test.cpp
   base/test/test_runner.cpp
 )
 add_dependencies(antioch-base-test antioch-base)

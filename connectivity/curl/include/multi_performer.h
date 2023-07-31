@@ -15,6 +15,7 @@ namespace curl_transfer {
 
 typedef struct {
   void (*finish_cb)(std::unique_ptr<char>);
+  size_t size;
   char* buf;
 } EasyObj;
 
@@ -38,6 +39,7 @@ class MultiPerformer {
   std::mutex mtx;  // synchronizes all the below objects
   std::condition_variable cv;
   bool flag = false;
+  bool shutdown = false;
   std::map<CURL*, EasyObj> handle_objs;
 };
 

@@ -10,11 +10,6 @@
 
 namespace antioch::connectivity::curl_transfer {
 
-typedef struct {
-  size_t size;
-  char* buf;
-} curl_data;
-
 MultiPerformer::MultiPerformer(CURLM* multi_handle) : multi_handle(multi_handle) {
   std::thread thr(&MultiPerformer::run, this);
   thr.detach();
@@ -22,6 +17,8 @@ MultiPerformer::MultiPerformer(CURLM* multi_handle) : multi_handle(multi_handle)
 
 MultiPerformer::~MultiPerformer() {
   std::lock_guard<std::mutex> l(mtx);
+  shutdown = true;
+  cv.notify_all();
   for (const auto& pv : handle_objs) {
     curl_multi_remove_handle(multi_handle, pv.first);
   }
@@ -29,7 +26,7 @@ MultiPerformer::~MultiPerformer() {
 
 static size_t write_cb(void *data, size_t size, size_t nmemb, void *clientp) {
   size_t realsize = size * nmemb;
-  auto mem = (curl_data*)clientp;
+  auto mem = (EasyObj*)clientp;
   auto ptr = (char*)realloc(mem->buf, mem->size + realsize + 1);
   if(ptr == nullptr) {
     return 0;
@@ -45,7 +42,7 @@ static size_t write_cb(void *data, size_t size, size_t nmemb, void *clientp) {
 
 void MultiPerformer::queue_transfer(CURL* easy_handle, void (*finish_cb)(std::unique_ptr<char>)) {
   std::scoped_lock<std::mutex> l(mtx);
-  handle_objs[easy_handle] = {finish_cb, nullptr};
+  handle_objs[easy_handle] = {finish_cb, 0, nullptr};
   curl_easy_setopt(easy_handle, CURLOPT_WRITEFUNCTION, write_cb);
   curl_easy_setopt(easy_handle, CURLOPT_WRITEDATA, &handle_objs[easy_handle]);
   auto res = curl_multi_add_handle(multi_handle, easy_handle);
@@ -64,8 +61,14 @@ void MultiPerformer::run() {
   while (1) {
     {
       std::unique_lock<std::mutex> l(mtx);
+      if (shutdown) {
+        return;
+      }
       if (!flag) {
         cv.wait(l, [this] { return flag; });
+      }
+      if (shutdown) {
+        return;
       }
     }
     // potentailly multiple transfers chained together
@@ -86,7 +89,8 @@ void MultiPerformer::do_transfers() {
       throw LibCurlInternalException(msg);
     }
     CURLMsg* read_res;
-    while ((read_res = curl_multi_info_read(multi_handle, nullptr))) {
+    int _;
+    while ((read_res = curl_multi_info_read(multi_handle, &_))) {
       if (read_res->msg == CURLMSG_DONE) {
         curl_multi_remove_handle(multi_handle, read_res->easy_handle);
         curl_easy_cleanup(read_res->easy_handle);
