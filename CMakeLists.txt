@@ -34,7 +34,10 @@ FetchContent_Declare(
   GIT_REPOSITORY https://github.com/google/googletest.git
   GIT_TAG        release-1.11.0
 )
-
+# For Windows: Prevent overriding the parent project's compiler/linker settings
+if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+  set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+endif()
 FetchContent_MakeAvailable(googletest)
 
 #add_compile_options(-fsanitize=address)
@@ -51,26 +54,9 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(absl)
 
-FetchContent_Declare(
-  googletest
-  GIT_REPOSITORY https://github.com/google/googletest.git
-  GIT_TAG        release-1.11.0
-)
-# For Windows: Prevent overriding the parent project's compiler/linker settings
-if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-  set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-endif()
-FetchContent_MakeAvailable(googletest)
-
 FetchContent_Declare(json
 URL https://github.com/nlohmann/json/releases/download/v3.11.2/json.tar.xz
 )
-
-# For Windows: Prevent overriding the parent project's compiler/linker settings
-if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
-  set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-endif()
-
 FetchContent_MakeAvailable(json)
 
 set(protobuf_BUILD_TESTS OFF)
@@ -151,12 +137,6 @@ target_link_libraries(antioch-base-test PUBLIC
   GTest::gtest_main
 )
 include(GoogleTest)
-# Windows environment on GitHub Actions is quirky
-if (DEFINED ENV{GITHUB_ACTIONS} AND WIN32)
-gtest_add_tests(TARGET antioch-base-test)
-else()
-gtest_discover_tests(antioch-base-test)
-endif()
 
 ###############################################################
 ########################## Utilities ##########################
