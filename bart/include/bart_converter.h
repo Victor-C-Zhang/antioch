@@ -15,7 +15,7 @@ namespace bart {
 class BartConverter : public antioch::transit_base::Converter {
  public:
   static constexpr int refreshTimeSecs = 60;
-  
+
   BartConverter();
 
   /**
@@ -34,7 +34,7 @@ class BartConverter : public antioch::transit_base::Converter {
   void stopTracking(const antioch::transit_base::Station& station) override;
 
   std::string get(const antioch::transit_base::Station& station) override;
-  
+
  protected:
   std::string convert_to_string(const std::vector<std::byte>& data);
 
@@ -46,7 +46,7 @@ class BartConverter : public antioch::transit_base::Converter {
 
   /**
    * Increment last_fetch by REFRESH_TIME_SECS s.t. it is the greatest value less or equal to now.
-   * 
+   *
    */
   void update_last_fetch(const std::chrono::time_point<std::chrono::system_clock>& now);
 

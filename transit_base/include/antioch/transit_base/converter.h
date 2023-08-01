@@ -30,7 +30,7 @@ class Converter {
    * This data need not be current, or even correct. It may be cached or even made up.
    * @param station the station to query.
    * @throw StationGetException in error cases.
-   * @return std::string 
+   * @return std::string
    */
   virtual std::string get(const antioch::transit_base::Station& station) = 0;
 };

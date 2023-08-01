@@ -28,6 +28,18 @@ endif()
 
 add_compile_options(-fno-rtti)
 
+enable_testing()
+FetchContent_Declare(
+  googletest
+  GIT_REPOSITORY https://github.com/google/googletest.git
+  GIT_TAG        release-1.11.0
+)
+# For Windows: Prevent overriding the parent project's compiler/linker settings
+if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+  set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+endif()
+FetchContent_MakeAvailable(googletest)
+
 #add_compile_options(-fsanitize=address)
 #add_link_options(-fsanitize=address)
 
@@ -41,17 +53,6 @@ FetchContent_Declare(
   GIT_TAG 20230125.3
 )
 FetchContent_MakeAvailable(absl)
-
-FetchContent_Declare(
-  googletest
-  GIT_REPOSITORY https://github.com/google/googletest.git
-  GIT_TAG        release-1.11.0
-)
-# For Windows: Prevent overriding the parent project's compiler/linker settings
-if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-  set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-endif()
-FetchContent_MakeAvailable(googletest)
 
 FetchContent_Declare(json
 URL https://github.com/nlohmann/json/releases/download/v3.11.2/json.tar.xz
@@ -134,8 +135,8 @@ target_include_directories(antioch-base-test PUBLIC
 target_link_libraries(antioch-base-test PUBLIC
   antioch-base
   GTest::gtest_main
-  GTest::gmock_main
 )
+include(GoogleTest)
 
 ###############################################################
 ########################## Utilities ##########################

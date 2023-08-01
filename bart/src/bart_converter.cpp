@@ -2,9 +2,10 @@
 
 #include "bart_converter.h"
 
+#include <gtfs-realtime.pb.h>
+
 #include <chrono>
 #include <typeinfo>
-#include <gtfs-realtime.pb.h>
 
 #include "train_description.h"
 
@@ -70,11 +71,14 @@ std::vector<StationArrivals> BartConverter::convert(const std::vector<std::byte>
   fm.ParseFromArray(data.data(), data.size());
   auto feed_header = fm.header();
   if (feed_header.gtfs_realtime_version() != "1.0") {
-    std::string msg = "Expected gtfs_realtime_version 1.0 but got " + feed_header.gtfs_realtime_version();
+    std::string msg =
+        "Expected gtfs_realtime_version 1.0 but got " + feed_header.gtfs_realtime_version();
     throw InvariantViolation(msg);
   }
-  if (feed_header.incrementality() != FeedHeader_Incrementality::FeedHeader_Incrementality_FULL_DATASET) {
-    std::string msg = "Expected incrementality FULL_DATASET but got " + FeedHeader_Incrementality_Name(feed_header.incrementality());
+  if (feed_header.incrementality() !=
+      FeedHeader_Incrementality::FeedHeader_Incrementality_FULL_DATASET) {
+    std::string msg = "Expected incrementality FULL_DATASET but got " +
+                      FeedHeader_Incrementality_Name(feed_header.incrementality());
     throw InvariantViolation(msg);
   }
   for (int i = 0; i < fm.entity_size(); ++i) {
@@ -123,63 +127,77 @@ void BartConverter::refresh_cache(const std::chrono::time_point<std::chrono::sys
 TrainDescription BartConverter::line_of(const TripUpdate& tu) {
   int n = tu.stop_time_update_size();
   auto second_to_last_stop = tu.stop_time_update(n - 1);
-  
+
   // Green
-  if (second_to_last_stop.stop_id() == StationIdentifier_Name(BALB) && second_to_last_stop.stop_sequence() == 20) {
+  if (second_to_last_stop.stop_id() == StationIdentifier_Name(BALB) &&
+      second_to_last_stop.stop_sequence() == 20) {
     return {DALY, BartLine::GREEN};
   }
-  if (second_to_last_stop.stop_id() == StationIdentifier_Name(MLPT) && second_to_last_stop.stop_sequence() == 20) {
+  if (second_to_last_stop.stop_id() == StationIdentifier_Name(MLPT) &&
+      second_to_last_stop.stop_sequence() == 20) {
     return {BERY, BartLine::GREEN};
   }
 
   // Orange
-  if (second_to_last_stop.stop_id() == StationIdentifier_Name(MLPT) && second_to_last_stop.stop_sequence() == 19) {
+  if (second_to_last_stop.stop_id() == StationIdentifier_Name(MLPT) &&
+      second_to_last_stop.stop_sequence() == 19) {
     return {DALY, BartLine::ORANGE};
   }
-  if (second_to_last_stop.stop_id() == StationIdentifier_Name(DELN) && second_to_last_stop.stop_sequence() == 19) {
+  if (second_to_last_stop.stop_id() == StationIdentifier_Name(DELN) &&
+      second_to_last_stop.stop_sequence() == 19) {
     return {DALY, BartLine::ORANGE};
   }
 
   // Yellow
-  if (second_to_last_stop.stop_id() == StationIdentifier_Name(SBRN) && second_to_last_stop.stop_sequence() == 24) {
+  if (second_to_last_stop.stop_id() == StationIdentifier_Name(SBRN) &&
+      second_to_last_stop.stop_sequence() == 24) {
     return {SFIA, BartLine::YELLOW};
   }
-  if (second_to_last_stop.stop_id() == StationIdentifier_Name(PITT) && second_to_last_stop.stop_sequence() == 24) {
+  if (second_to_last_stop.stop_id() == StationIdentifier_Name(PITT) &&
+      second_to_last_stop.stop_sequence() == 24) {
     return {ANTC, BartLine::YELLOW};
   }
 
   // Red
-  if (second_to_last_stop.stop_id() == StationIdentifier_Name(SBRN) && second_to_last_stop.stop_sequence() == 21) {
+  if (second_to_last_stop.stop_id() == StationIdentifier_Name(SBRN) &&
+      second_to_last_stop.stop_sequence() == 21) {
     return {SFIA, BartLine::RED};
   }
-  if (second_to_last_stop.stop_id() == StationIdentifier_Name(MLBR) && second_to_last_stop.stop_sequence() == 0) {
+  if (second_to_last_stop.stop_id() == StationIdentifier_Name(MLBR) &&
+      second_to_last_stop.stop_sequence() == 0) {
     return {SFIA, BartLine::RED};
   }
-  if (second_to_last_stop.stop_id() == StationIdentifier_Name(DELN) && second_to_last_stop.stop_sequence() == 21) {
+  if (second_to_last_stop.stop_id() == StationIdentifier_Name(DELN) &&
+      second_to_last_stop.stop_sequence() == 21) {
     return {RICH, BartLine::RED};
   }
 
   // Blue
-  if (second_to_last_stop.stop_id() == StationIdentifier_Name(BALB) && second_to_last_stop.stop_sequence() == 16) {
+  if (second_to_last_stop.stop_id() == StationIdentifier_Name(BALB) &&
+      second_to_last_stop.stop_sequence() == 16) {
     return {DALY, BartLine::BLUE};
   }
-  if (second_to_last_stop.stop_id() == StationIdentifier_Name(WDUB) && second_to_last_stop.stop_sequence() == 16) {
+  if (second_to_last_stop.stop_id() == StationIdentifier_Name(WDUB) &&
+      second_to_last_stop.stop_sequence() == 16) {
     return {DUBL, BartLine::BLUE};
   }
 
   // Yellow PM
-  if (second_to_last_stop.stop_id() == StationIdentifier_Name(SBRN) && second_to_last_stop.stop_sequence() == 24) {
+  if (second_to_last_stop.stop_id() == StationIdentifier_Name(SBRN) &&
+      second_to_last_stop.stop_sequence() == 24) {
     return {MLBR, BartLine::YELLOW_PM};
   }
-  if (second_to_last_stop.stop_id() == StationIdentifier_Name(SFIA) && second_to_last_stop.stop_sequence() == 0) {
+  if (second_to_last_stop.stop_id() == StationIdentifier_Name(SFIA) &&
+      second_to_last_stop.stop_sequence() == 0) {
     return {MLBR, BartLine::YELLOW_PM};
   }
-  if (second_to_last_stop.stop_id() == StationIdentifier_Name(PITT) && second_to_last_stop.stop_sequence() == 24) {
+  if (second_to_last_stop.stop_id() == StationIdentifier_Name(PITT) &&
+      second_to_last_stop.stop_sequence() == 24) {
     return {ANTC, BartLine::YELLOW_PM};
   }
 
-  std::string msg = "Unexpected line terminus combo: " + second_to_last_stop.stop_id()
-                    + ", seq_num " + std::to_string((int)second_to_last_stop.stop_sequence());
+  std::string msg = "Unexpected line terminus combo: " + second_to_last_stop.stop_id() +
+                    ", seq_num " + std::to_string((int)second_to_last_stop.stop_sequence());
   throw InvariantViolation(msg);
 }
 

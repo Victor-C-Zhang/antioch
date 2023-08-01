@@ -6,7 +6,8 @@
 
 namespace antioch::bart {
 
-BartStation::BartStation(StationIdentifier id) : Station(antioch::transit_base::TransitAgency::BART, id) {}
+BartStation::BartStation(StationIdentifier id)
+    : Station(antioch::transit_base::TransitAgency::BART, id) {}
 
 BartStation::BartStation(const Station& station) : BartStation((StationIdentifier)station.id()) {
   if (station.agency() != antioch::transit_base::TransitAgency::BART) {
@@ -14,8 +15,6 @@ BartStation::BartStation(const Station& station) : BartStation((StationIdentifie
   }
 }
 
-std::string BartStation::pretty_name() const {
-  return "TODO";
-}
+std::string BartStation::pretty_name() const { return "TODO"; }
 
 }  // namespace antioch::bart
