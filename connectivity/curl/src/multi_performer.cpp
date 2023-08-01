@@ -17,11 +17,14 @@ MultiPerformer::MultiPerformer(CURLM* multi_handle) : multi_handle(multi_handle)
 
 MultiPerformer::~MultiPerformer() {
   std::lock_guard<std::mutex> l(mtx);
+  std::cout << "got lock" << std::endl;
   shutdown = true;
+  flag = true;
   cv.notify_all();
   for (const auto& pv : handle_objs) {
     curl_multi_remove_handle(multi_handle, pv.first);
   }
+  std::cout << "done dtor" << std::endl;
 }
 
 static size_t write_cb(void *data, size_t size, size_t nmemb, void *clientp) {
@@ -64,15 +67,20 @@ void MultiPerformer::run() {
       if (shutdown) {
         return;
       }
+    std::cout << "start wait" << std::endl;
       if (!flag) {
         cv.wait(l, [this] { return flag; });
       }
+    std::cout << "waited" << std::endl;
       if (shutdown) {
+    std::cout << "shutting down runner" << std::endl;
         return;
       }
     }
     // potentailly multiple transfers chained together
+    std::cout << "start tr" << std::endl;
     do_transfers();
+    std::cout << "end tr" << std::endl;
     {
       std::scoped_lock<std::mutex> l(mtx);
       flag = false;

@@ -15,7 +15,7 @@ namespace curl_transfer {
  * @param url the url to curl
  * @param write_cb a function that takes as input the read data
  */
-void start_transfer(const std::string& url, void (*cb)(std::unique_ptr<char>));
+void start_transfer(const std::string& url, bool follow_redirects, void (*cb)(std::unique_ptr<char>));
 
 class LibCurlInternalException : public std::runtime_error {
  public:
