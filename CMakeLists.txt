@@ -57,6 +57,12 @@ FetchContent_MakeAvailable(absl)
 FetchContent_Declare(json
 URL https://github.com/nlohmann/json/releases/download/v3.11.2/json.tar.xz
 )
+
+# For Windows: Prevent overriding the parent project's compiler/linker settings
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+  set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+endif()
+
 FetchContent_MakeAvailable(json)
 
 set(protobuf_BUILD_TESTS OFF)
