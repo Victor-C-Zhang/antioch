@@ -43,11 +43,8 @@ void write_or_exception(const Config& config) {
 std::unique_ptr<Config> default_config() {
   auto config = new Config();
   config->user_mode = UserMode::HOME_STOP;
-  config->stations.push_back({
-      .name = "BART_Civic",
-      .pretty_name = "Civic Center/UN Plaza",
-      .fetch_url = "",
-  });
+  antioch::transit_base::Station civic(antioch::transit_base::TransitAgency::BART, 31);
+  config->stations.push_back(civic);
   return std::unique_ptr<Config>(config);
 }
 

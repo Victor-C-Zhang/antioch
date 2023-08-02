@@ -3,41 +3,136 @@ run-name: Building And Testing Antioch
 on: [push]
 
 jobs:
-    build-on-windows:
-        runs-on: windows-latest
-        steps:
-          - name: Checkout Repo
-            uses: actions/checkout@v3
+  build:
+    name: ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+        # LOST CAUSE
+        # - {
+        #   name: "Windows Latest Release MinGW",
+        #   os: windows-latest,
+        #   build_type: "Release", cc: "gcc", cxx: "g++"
+        # }
+        - {
+          name: "Ubuntu Latest Release GCC",
+          os: ubuntu-latest,
+          build_type: "Release", cc: "gcc", cxx: "g++"
+        }
+        - {
+          name: "Ubuntu Latest Debug GCC",
+          os: ubuntu-latest,
+          build_type: "Debug", cc: "gcc", cxx: "g++"
+        }
 
-          - name: Get CMake
-            uses: lukka/get-cmake@latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
 
-          - run: |
-              mkdir build
-              cd build
+      - name: Download CMake and Ninja
+        uses: lukka/get-cmake@latest
 
-          - name: Set up Ninja Debug build
-            run: cmake -G Ninja -DCMAKE_BUILD_TYPE=Debug -S . -B build
-          - name: Build with Ninja
-            run: cmake --build build
+      - name: Cache ccache binary
+        id: cache-ccache-bin
+        uses: actions/cache@v3
+        with:
+          path: "ccache-4.8.2-linux-x86_64"
+          key: ${{ matrix.config.name }}-bin-ccache
 
-    build-on-linux:
-        runs-on: ubuntu-latest
-        steps:
-          - name: Checkout Repo
-            uses: actions/checkout@v3
+      - name: Download ccache
+        id: ccache
+        if: steps.cache-ccache-bin.outputs.cache-hit != 'true'
+        shell: cmake -P {0}
+        run: |
+          set(ccache_url "https://github.com/ccache/ccache/releases/download/v4.8.2/ccache-4.8.2-linux-x86_64.tar.xz")
+          file(DOWNLOAD "${ccache_url}" ./ccache.tar.xz SHOW_PROGRESS)
+          execute_process(COMMAND ${CMAKE_COMMAND} -E tar xvf ./ccache.tar.xz)
+          
+      - name: Add ccache to path
+        shell: bash
+        run: |
+          echo "$GITHUB_WORKSPACE/ccache-4.8.2-linux-x86_64" >> $GITHUB_PATH
 
-          - name: Get CMake
-            uses: lukka/get-cmake@latest
+      - name: Prepare ccache timestamp
+        id: ccache_cache_timestamp
+        shell: cmake -P {0}
+        run: |
+          string(TIMESTAMP current_date "%Y-%m-%d-%H;%M;%S" UTC)
+          file(APPEND "$ENV{GITHUB_OUTPUT}" "timestamp=${current_date}")
+    
+      - name: ccache cache files
+        uses: actions/cache@v3
+        with:
+          path: .ccache
+          key: ${{ matrix.config.name }}-ccache-${{ steps.ccache_cache_timestamp.outputs.timestamp }}
+          restore-keys: |
+            ${{ matrix.config.name }}-ccache-
 
-          - run: |
-              mkdir build
-              cd build
+      - name: Configure
+        shell: cmake -P {0}
+        run: |
+          set(ENV{CC} ${{ matrix.config.cc }})
+          set(ENV{CXX} ${{ matrix.config.cxx }})
+        
+          execute_process(
+            COMMAND ${CMAKE_COMMAND}
+              -S .
+              -B build
+              -D CMAKE_BUILD_TYPE=${{ matrix.config.build_type }}
+              -D CMAKE_C_COMPILER_LAUNCHER=ccache
+              -D CMAKE_CXX_COMPILER_LAUNCHER=ccache
+              -G Ninja
+            RESULT_VARIABLE result
+          )
+          if (NOT result EQUAL 0)
+            message(FATAL_ERROR "Bad exit status")
+          endif()
 
-          - name: Set up Ninja Debug build
-            run: cmake -G Ninja -DCMAKE_BUILD_TYPE=Debug -S . -B build
-          - name: Build with Ninja
-            run: cmake --build build
+      - name: Build
+        shell: cmake -P {0}
+        run: |
+          set(ENV{NINJA_STATUS} "[%f/%t %o/sec] ")
+  
+          file(TO_CMAKE_PATH "$ENV{GITHUB_WORKSPACE}" ccache_basedir)
+          set(ENV{CCACHE_BASEDIR} "${ccache_basedir}")
+          set(ENV{CCACHE_DIR} "${ccache_basedir}/.ccache")
+          set(ENV{CCACHE_COMPRESS} "true")
+          set(ENV{CCACHE_COMPRESSLEVEL} "6")
+          set(ENV{CCACHE_MAXSIZE} "400M")
 
-          - name: Running Antioch Base Tests
-            run: ctest --test-dir build
+          execute_process(COMMAND ccache -p)
+          execute_process(COMMAND ccache -z)
+
+          execute_process(
+            COMMAND ${CMAKE_COMMAND} --build build
+            RESULT_VARIABLE result
+          )
+          if (NOT result EQUAL 0)
+            message(FATAL_ERROR "Bad exit status")
+          endif()
+
+      - name: ccache statistics
+        shell: cmake -P {0}
+        run: |
+          file(TO_CMAKE_PATH "$ENV{GITHUB_WORKSPACE}" ccache_basedir)
+          set(ENV{CCACHE_BASEDIR} "${ccache_basedir}")
+          set(ENV{CCACHE_DIR} "${ccache_basedir}/.ccache")
+    
+          execute_process(COMMAND ccache -s)
+  
+      - name: Test
+        shell: cmake -P {0}
+        run: |
+          include(ProcessorCount)
+          ProcessorCount(N)
+
+          execute_process(
+            COMMAND ctest -j ${N}
+            WORKING_DIRECTORY build
+            RESULT_VARIABLE result
+          )
+          if (NOT result EQUAL 0)
+            message(FATAL_ERROR "Running tests failed!")
+          endif()
