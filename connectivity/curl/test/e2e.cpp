@@ -21,13 +21,22 @@ void cb2(std::string buf) {
   std::cout << "done2" << std::endl;
 }
 
-TEST(E2E, curlGoogle) {
+TEST(E2E, DISABLED_curlGoogle) {
   antioch::connectivity::curl_transfer::start_transfer("www.google.com", false, cb);
   std::this_thread::sleep_for(std::chrono::seconds(2));
 }
 
-TEST(E2E, curlTwo) {
+TEST(E2E, DISABLED_curlTwo) {
   antioch::connectivity::curl_transfer::start_transfer("www.google.com", false, cb);
+  antioch::connectivity::curl_transfer::start_transfer("api.bart.gov/gtfsrt/tripupdate.aspx", true, cb2);
+  std::this_thread::sleep_for(std::chrono::seconds(4));
+}
+
+TEST(E2E, DISABLED_curlApart) {
+  antioch::connectivity::curl_transfer::start_transfer("www.google.com", false, cb);
+  std::cout << "Start sleep" << std::endl;
+  std::this_thread::sleep_for(std::chrono::seconds(2));
+  std::cout << "End sleep" << std::endl;
   antioch::connectivity::curl_transfer::start_transfer("api.bart.gov/gtfsrt/tripupdate.aspx", true, cb2);
   std::this_thread::sleep_for(std::chrono::seconds(4));
 }
