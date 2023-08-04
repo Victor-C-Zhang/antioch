@@ -64,7 +64,12 @@ int main(int argc, char** argv) {
   }
   std::cout << "Scheduled: [" << std::endl;
   for (auto unix_ts : ts) {
+#if UINTPTR_MAX == 0xffFFffFF
+    long temp = (long)unix_ts;
+    std::cout << std::ctime(&temp);
+#else
     std::cout << std::ctime(&unix_ts);
+#endif
   }
   std::cout << "]" << std::endl;
   std::cout << "Press Ctrl+C to terminate at any time." << std::endl;
@@ -79,7 +84,12 @@ int main(int argc, char** argv) {
     if (sleep_period > 0) {
       std::this_thread::sleep_for(std::chrono::seconds(sleep_period));
     }
+#if UINTPTR_MAX == 0xffFFffFF
+    long temp = (long)unix_ts;
+    std::cout << "Running: " << std::ctime(&temp);
+#else
     std::cout << "Running: " << std::ctime(&unix_ts);
+#endif
     try {
       std::string wgetCmd = "wget -O " + raw_feed + " https://api.bart.gov/gtfsrt/tripupdate.aspx";
       exec(wgetCmd.c_str());
