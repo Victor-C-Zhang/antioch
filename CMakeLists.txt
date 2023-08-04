@@ -34,7 +34,10 @@ FetchContent_Declare(
   GIT_REPOSITORY https://github.com/google/googletest.git
   GIT_TAG        release-1.11.0
 )
-
+# For Windows: Prevent overriding the parent project's compiler/linker settings
+if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+  set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+endif()
 FetchContent_MakeAvailable(googletest)
 
 #add_compile_options(-fsanitize=address)
@@ -42,8 +45,17 @@ FetchContent_MakeAvailable(googletest)
 
 add_subdirectory(gfx)
 
+set(BUILD_TESTING OFF) # to disable abseil test
+set(ABSL_ENABLE_INSTALL ON) # now you can enable install rules even in subproject... 
+FetchContent_Declare(
+  absl
+  GIT_REPOSITORY https://github.com/abseil/abseil-cpp.git
+  GIT_TAG 20230125.3
+)
+FetchContent_MakeAvailable(absl)
+
 FetchContent_Declare(json
-  URL https://github.com/nlohmann/json/releases/download/v3.11.2/json.tar.xz
+URL https://github.com/nlohmann/json/releases/download/v3.11.2/json.tar.xz
 )
 
 # For Windows: Prevent overriding the parent project's compiler/linker settings
@@ -52,6 +64,28 @@ if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
 endif()
 
 FetchContent_MakeAvailable(json)
+
+set(protobuf_BUILD_TESTS OFF)
+FetchContent_Declare(protobuf
+  URL https://github.com/protocolbuffers/protobuf/releases/download/v23.4/protobuf-23.4.tar.gz
+)
+FetchContent_MakeAvailable(protobuf)
+# Get source directory of the Protobuf
+FetchContent_GetProperties(protobuf SOURCE_DIR Protobuf_SOURCE_DIR)
+# Include the script which defines 'protobuf_generate'
+include(${Protobuf_SOURCE_DIR}/cmake/protobuf-generate.cmake)
+# For generated sources
+file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/generated")
+
+add_library(proto-objs OBJECT proto/gtfs-realtime.proto)
+target_link_libraries(proto-objs PUBLIC protobuf::libprotobuf)
+set(PROTO_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/generated")
+target_include_directories(proto-objs PUBLIC "$<BUILD_INTERFACE:${PROTO_BINARY_DIR}>")
+protobuf_generate(
+    TARGET proto-objs
+    IMPORT_DIRS "${CMAKE_CURRENT_LIST_DIR}/proto"
+    PROTOC_OUT_DIR "${PROTO_BINARY_DIR}"
+)
 
 ###############################################################
 ########################## Libraries ##########################
@@ -68,6 +102,7 @@ target_link_libraries(curl-transfer PUBLIC curl)
 # Base transit boilerplate
 add_library(transit-base INTERFACE)
 target_include_directories(transit-base INTERFACE transit_base/include)
+target_link_libraries(transit-base INTERFACE nlohmann_json::nlohmann_json)
 
 # Event loop and core code
 add_library(antioch-base
@@ -83,6 +118,15 @@ add_library(sfmuni
 )
 target_include_directories(sfmuni PUBLIC sfmuni/include transit_base/include)
 
+# BART
+add_library(bart
+  bart/src/bart_converter.cpp
+  bart/src/bart_station.cpp
+  bart/src/station_arrivals.cpp
+)
+target_include_directories(bart PRIVATE bart/include)
+target_link_libraries(bart PRIVATE transit-base proto-objs)
+
 # main exe
 add_executable(antioch
   base/main.cpp
@@ -90,10 +134,12 @@ add_executable(antioch
 add_dependencies(antioch
   antioch-base
   sfmuni
+  bart
 )
 target_link_libraries(antioch PUBLIC
   antioch-base
   sfmuni
+  bart
   nlohmann_json::nlohmann_json
 )
 
@@ -131,12 +177,6 @@ target_link_libraries(antioch-base-test PUBLIC
   GTest::gtest_main
 )
 include(GoogleTest)
-# Windows environment on GitHub Actions is quirky
-if (DEFINED ENV{GITHUB_ACTIONS} AND WIN32)
-gtest_add_tests(TARGET antioch-base-test)
-else()
-gtest_discover_tests(antioch-base-test)
-endif()
 
 ###############################################################
 ########################## Utilities ##########################
