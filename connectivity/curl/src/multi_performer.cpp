@@ -28,6 +28,7 @@ MultiPerformer::~MultiPerformer() {
 }
 
 static size_t write_cb(void *data, size_t size, size_t nmemb, void *clientp) {
+  std::cout << "Called write_cb" << std::endl;
   size_t realsize = size * nmemb;
   auto mem = (EasyObj*)clientp;
   auto ptr = (char*)realloc(mem->buf, mem->size + realsize + 1);
@@ -43,7 +44,7 @@ static size_t write_cb(void *data, size_t size, size_t nmemb, void *clientp) {
   return realsize;
 }
 
-void MultiPerformer::queue_transfer(CURL* easy_handle, void (*finish_cb)(std::unique_ptr<char>)) {
+void MultiPerformer::queue_transfer(CURL* easy_handle, void (*finish_cb)(std::string)) {
   std::scoped_lock<std::mutex> l(mtx);
   handle_objs[easy_handle] = {finish_cb, 0, nullptr};
   curl_easy_setopt(easy_handle, CURLOPT_WRITEFUNCTION, write_cb);
@@ -105,7 +106,7 @@ void MultiPerformer::do_transfers() {
         {
           std::scoped_lock<std::mutex> l(mtx);
           const auto& easy_obj = handle_objs[read_res->easy_handle];
-          auto thr = std::thread(easy_obj.finish_cb, std::unique_ptr<char>(easy_obj.buf));
+          auto thr = std::thread(easy_obj.finish_cb, std::string(easy_obj.buf, easy_obj.size));
           thr.detach();
           handle_objs.erase(read_res->easy_handle);
         }
@@ -115,7 +116,7 @@ void MultiPerformer::do_transfers() {
         {
           std::scoped_lock<std::mutex> l(mtx);
           const auto& easy_obj = handle_objs[read_res->easy_handle];
-          auto thr = std::thread(easy_obj.finish_cb, std::unique_ptr<char>(nullptr));
+          auto thr = std::thread(easy_obj.finish_cb, std::string());
           thr.detach();
           handle_objs.erase(read_res->easy_handle);
         }

@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include <memory>
+#include <stdexcept>
 #include <string>
 
 namespace antioch {
@@ -11,11 +11,12 @@ namespace curl_transfer {
 
 /**
  * Initiate an async curl transfer.
- * 
+ *
  * @param url the url to curl
  * @param write_cb a function that takes as input the read data
  */
-void start_transfer(const std::string& url, bool follow_redirects, void (*cb)(std::unique_ptr<char>));
+void start_transfer(const std::string& url, bool follow_redirects,
+                    void (*cb)(std::string));
 
 class LibCurlInternalException : public std::runtime_error {
  public:

@@ -9,19 +9,15 @@
 
 #include "transfer.h"
 
-void cb(std::unique_ptr<char> buf) {
+void cb(std::string buf) {
   std::cout << "called end" << std::endl;
-  char* e = buf.get();
-  printf("%s\n", e);
+  printf("%s\n", buf.c_str());
   std::cout << "done" << std::endl;
 }
 
-void cb2(std::unique_ptr<char> buf) {
+void cb2(std::string buf) {
   std::cout << "called end with ";
-  char* e = buf.get();
-  int ptr;
-  while (e[ptr]) ++ptr;
-  std::cout << ptr << std::endl;
+  std::cout << buf.size() << std::endl;
   std::cout << "done2" << std::endl;
 }
 

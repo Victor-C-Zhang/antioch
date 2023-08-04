@@ -24,7 +24,7 @@ class _Transfer_Internal {
   _Transfer_Internal(const _Transfer_Internal&) = delete;
   void operator=(const _Transfer_Internal&) = delete;
 
-  void start_transfer(const std::string& url, bool follow_redirects, void (*cb)(std::unique_ptr<char>));
+  void start_transfer(const std::string& url, bool follow_redirects, void (*cb)(std::string));
 
  private:
   _Transfer_Internal();
@@ -84,7 +84,7 @@ void _Transfer_Internal::curl_destruct_internal() {
   global_inited = false;
 }
 
-void _Transfer_Internal::start_transfer(const std::string& url, bool follow_redirects, void (*cb)(std::unique_ptr<char>)) {
+void _Transfer_Internal::start_transfer(const std::string& url, bool follow_redirects, void (*cb)(std::string)) {
   CURL* eh = curl_easy_init();
   if (eh == nullptr) {
     throw LibCurlInternalException("curl_easy_init returned nullptr");
@@ -96,7 +96,7 @@ void _Transfer_Internal::start_transfer(const std::string& url, bool follow_redi
   mp->queue_transfer(eh, cb);
 }
 
-void start_transfer(const std::string& url, bool follow_redirects, void (*cb)(std::unique_ptr<char>)) {
+void start_transfer(const std::string& url, bool follow_redirects, void (*cb)(std::string)) {
   _Transfer_Internal::instance().start_transfer(url, follow_redirects, cb);
 }
 
