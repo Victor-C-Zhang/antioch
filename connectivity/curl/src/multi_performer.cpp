@@ -19,7 +19,7 @@ MultiPerformer::~MultiPerformer() {
   std::lock_guard<std::mutex> l(mtx);
   std::cout << "got lock" << std::endl;
   shutdown = true;
-  flag = true;
+  more_to_transfer = true;
   cv.notify_all();
   for (const auto& pv : handle_objs) {
     curl_multi_remove_handle(multi_handle, pv.first);
@@ -30,8 +30,8 @@ MultiPerformer::~MultiPerformer() {
 static size_t write_cb(void *data, size_t size, size_t nmemb, void *clientp) {
   std::cout << "Called write_cb" << std::endl;
   size_t realsize = size * nmemb;
-  auto mem = (EasyObj*)clientp;
-  auto ptr = (char*)realloc(mem->buf, mem->size + realsize + 1);
+  auto mem = static_cast<EasyObj*>(clientp);
+  auto* ptr = (char*)realloc(mem->buf, mem->size + realsize + 1);
   if(ptr == nullptr) {
     return 0;
   }
@@ -55,8 +55,8 @@ void MultiPerformer::queue_transfer(CURL* easy_handle, void (*finish_cb)(std::st
     handle_objs.erase(handle_objs.find(easy_handle));
     throw LibCurlInternalException(msg);
   }
-  if (!flag) {
-    flag = true;
+  if (!more_to_transfer) {
+    more_to_transfer = true;
     cv.notify_all();
   }
 }
@@ -69,8 +69,8 @@ void MultiPerformer::run() {
         return;
       }
     std::cout << "start wait" << std::endl;
-      if (!flag) {
-        cv.wait(l, [this] { return flag; });
+      if (!more_to_transfer) {
+        cv.wait(l, [this] { return more_to_transfer; });
       }
     std::cout << "waited" << std::endl;
       if (shutdown) {
@@ -84,7 +84,7 @@ void MultiPerformer::run() {
     std::cout << "end tr" << std::endl;
     {
       std::scoped_lock<std::mutex> l(mtx);
-      flag = false;
+      more_to_transfer = false;
     }
   }
 }

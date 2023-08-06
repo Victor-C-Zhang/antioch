@@ -37,7 +37,7 @@ class MultiPerformer {
 
   std::mutex mtx;  // synchronizes all the below objects
   std::condition_variable cv;
-  bool flag = false;
+  bool more_to_transfer = false;
   bool shutdown = false;
   std::map<CURL*, EasyObj> handle_objs;
 };
