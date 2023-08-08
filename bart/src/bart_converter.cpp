@@ -90,7 +90,7 @@ std::vector<StationArrivals> BartConverter::convert(const std::vector<std::byte>
   {
     std::scoped_lock<std::mutex> l(stations_mtx);
     std::vector<StationArrivals> trains;
-    for (int i = 0; i < stations.size(); ++i) {
+    for (unsigned i = 0; i < stations.size(); ++i) {
       std::vector<TrainArrival> arrival_vec;
       for (int j = 0; j < fm.entity_size(); ++j) {
         const auto& trip_update = fm.entity(i).trip_update();

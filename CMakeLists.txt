@@ -110,9 +110,23 @@ add_library(bart
   bart/src/bart_converter.cpp
   bart/src/bart_station.cpp
   bart/src/station_arrivals.cpp
+  bart/src/station_identifier.cpp
 )
 target_include_directories(bart PRIVATE bart/include)
 target_link_libraries(bart PRIVATE transit-base proto-objs)
+
+add_executable(bart-test
+  bart/test/test_runner.cpp
+  bart/test/e2e.cpp
+)
+add_dependencies(bart-test bart)
+target_include_directories(bart-test PUBLIC
+  bart/include
+)
+target_link_libraries(bart-test PUBLIC
+  bart
+  GTest::gtest_main
+)
 
 # main exe
 add_executable(antioch

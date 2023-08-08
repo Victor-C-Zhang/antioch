@@ -3,83 +3,10 @@
 
 #include <antioch/transit_base/station.h>
 
+#include "station_identifier.h"
+
 namespace antioch {
 namespace bart {
-
-enum StationIdentifier : int {
-  INVALID = 0,
-  LAKE = 1,    // Lake Merritt
-  FTVL = 2,    // Fruitvale
-  COLS = 3,    // Coliseum
-  SANL = 4,    // San Leandro
-  BAYF = 5,    // Bay Fair
-  HAYW = 6,    // Hayward
-  SHAY = 7,    // South Hayward
-  UCTY = 8,    // Union City
-  FRMT = 9,    // Fremont
-  ROCK = 10,   // Rockridge
-  ORIN = 11,   // Orinda
-  LAFY = 12,   // Lafayette
-  WCRK = 13,   // Walnut Creek
-  PHIL = 14,   // Pleasant Hill
-  CONC = 15,   // Concord
-  NCON = 16,   // North Concord
-  PITT = 17,   // Pittsburg / Bay Point
-  PCTR = 18,   // Pittsburg Center
-  ANTC = 19,   //
-  OAKL = 20,   // Oakland International Airport
-  _12TH = 21,  // 12th Street / Oakland City Center
-  _19TH = 22,  // 19th Street Oakland
-  MCAR = 23,   // MacArthur
-  CAST = 24,   // Castro Valley
-  WDUB = 25,   // West Dublin / Pleasanton
-  DUBL = 26,   // Dublin / Pleasanton
-  WOAK = 27,   // West Oakland
-  EMBR = 28,   // Embarcadero
-  MONT = 29,   // Montgomery Street
-  POWL = 30,   // Powell Street
-  CIVC = 31,   // Civic Center / UN Plaza
-  _16TH = 32,  // 16th Street / Mission
-  _24TH = 33,  // 24th Street / Mission
-  GLEN = 34,   // Glen Park
-  BALB = 35,   // Balboa Park
-  DALY = 36,   // Daly City
-  ASHB = 37,   // Ashby
-  DBRK = 38,   // Downtown Berkeley
-  NBRK = 39,   // North Berkeley
-  PLZA = 40,   // El Cerrito Plaza
-  DELN = 41,   // El Cerrito Del Norte
-  RICH = 42,   // Richmond
-  WARM = 43,   // Warm Springs
-  MLPT = 44,   // Milpitas
-  BERY = 45,   // Beryessa / North San Jose
-  COLM = 46,   // Colma
-  SSAN = 47,   // South San Francisco
-  SBRN = 48,   // San Bruno
-  MLBR = 49,   // Millbrae (Cantrain Transfer Platform)
-  SFIA = 50,   // San Francisco International Airport
-};
-
-std::string StationIdentifier_Name(const StationIdentifier id) {
-  switch (id) {
-    case BALB:
-      return "BALB";
-    case MLPT:
-      return "MLPT";
-    case DELN:
-      return "DELN";
-    case PITT:
-      return "PITT";
-    case SBRN:
-      return "SBRN";
-    case MLBR:
-      return "MLBR";
-    case WDUB:
-      return "WDUB";
-    case PCTR:
-      return "PCTR";
-  }
-}
 
 class BartStation : public antioch::transit_base::Station {
  public:

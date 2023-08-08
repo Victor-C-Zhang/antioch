@@ -15,6 +15,8 @@ BartStation::BartStation(const Station& station) : BartStation((StationIdentifie
   }
 }
 
-std::string BartStation::pretty_name() const { return "TODO"; }
+std::string BartStation::pretty_name() const {
+  return StationIdentifier_pretty_name((StationIdentifier)id());
+}
 
 }  // namespace antioch::bart
