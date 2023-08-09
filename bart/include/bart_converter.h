@@ -37,7 +37,7 @@ class BartConverter : public antioch::transit_base::Converter {
   /**
    * Convert the bytestring into new train info.
    */
-  std::vector<StationArrivals> convert(const std::vector<std::byte>& data);
+  std::vector<StationArrivals> convert(const std::string& data);
 
  protected:
   std::string convert_to_string(const std::vector<std::byte>& data);

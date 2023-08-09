@@ -93,10 +93,10 @@ protobuf_generate(
 
 # Non-blocking curl
 add_library(curl-transfer
-connectivity/curl/src/multi_performer.cpp
+  connectivity/curl/src/multi_performer.cpp
   connectivity/curl/src/transfer.cpp
 )
-target_include_directories(curl-transfer PRIVATE connectivity/curl/include)
+target_include_directories(curl-transfer PUBLIC connectivity/curl/include)
 target_link_libraries(curl-transfer PUBLIC curl)
 
 # Base transit boilerplate
@@ -121,25 +121,13 @@ target_include_directories(sfmuni PUBLIC sfmuni/include transit_base/include)
 # BART
 add_library(bart
   bart/src/bart_converter.cpp
+  bart/src/bart_line.cpp
   bart/src/bart_station.cpp
   bart/src/station_arrivals.cpp
   bart/src/station_identifier.cpp
 )
 target_include_directories(bart PRIVATE bart/include)
-target_link_libraries(bart PRIVATE transit-base proto-objs)
-
-add_executable(bart-test
-  bart/test/test_runner.cpp
-  bart/test/e2e.cpp
-)
-add_dependencies(bart-test bart)
-target_include_directories(bart-test PUBLIC
-  bart/include
-)
-target_link_libraries(bart-test PUBLIC
-  bart
-  GTest::gtest_main
-)
+target_link_libraries(bart PUBLIC transit-base curl-transfer proto-objs)
 
 # main exe
 add_executable(antioch
@@ -175,6 +163,20 @@ target_link_libraries(curl-transfer-test PUBLIC
   curl-transfer
   GTest::gtest_main
   GTest::gmock_main
+)
+
+add_executable(bart-test
+  bart/test/test_runner.cpp
+  bart/test/e2e.cpp
+)
+add_dependencies(bart-test bart)
+target_include_directories(bart-test PUBLIC
+  bart/include
+)
+target_link_libraries(bart-test PUBLIC
+  bart
+  curl-transfer
+  GTest::gtest_main
 )
 
 add_executable(antioch-base-test
