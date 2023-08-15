@@ -93,6 +93,7 @@ protobuf_generate(
 
 # Non-blocking curl
 add_library(curl-transfer
+  connectivity/curl/src/latch.cpp
   connectivity/curl/src/multi_performer.cpp
   connectivity/curl/src/transfer.cpp
 )

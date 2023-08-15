@@ -2,6 +2,7 @@
 
 #include "bart_converter.h"
 
+#include <transfer.h>
 #include <gtfs-realtime.pb.h>
 
 #include <chrono>
@@ -119,8 +120,15 @@ void BartConverter::refresh_cache(const std::chrono::time_point<std::chrono::sys
   update_last_fetch(now);
 
   // TODO fetch from wifi
-  std::string e;
-  auto converted = convert(e);
+  std::string fetched;
+
+  auto cb = [&](std::string s) {
+    fetched.swap(s);
+    
+  };
+  antioch::connectivity::curl_transfer::start_transfer("api.bart.gov/gtfsrt/tripupdate.aspx", true,
+                                                       cb);
+  auto converted = convert(fetched);
   cache.swap(converted);
 }
 
