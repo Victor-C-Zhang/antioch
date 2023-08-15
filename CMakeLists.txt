@@ -57,7 +57,6 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(absl)
 
 FetchContent_Declare(json
-  DOWNLOAD_EXTRACT_TIMESTAMP 
   URL https://github.com/nlohmann/json/releases/download/v3.11.2/json.tar.xz
 )
 
@@ -69,8 +68,7 @@ endif()
 FetchContent_MakeAvailable(json)
 
 set(protobuf_BUILD_TESTS OFF)
-FetchContent_Declare(protobuf
-  DOWNLOAD_EXTRACT_TIMESTAMP 
+FetchContent_Declare(protobuf 
   URL https://github.com/protocolbuffers/protobuf/releases/download/v24.0/protobuf-24.0.tar.gz
 )
 FetchContent_MakeAvailable(protobuf)
