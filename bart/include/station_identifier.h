@@ -60,9 +60,9 @@ enum StationIdentifier : int {
   SFIA = 50,   // San Francisco International Airport
 };
 
-std::string StationIdentifier_Name(const StationIdentifier id);
+const std::string StationIdentifier_Name(const StationIdentifier id);
 
-std::string StationIdentifier_pretty_name(const StationIdentifier id);
+const std::string StationIdentifier_pretty_name(const StationIdentifier id);
 
 }  // namespace bart
 }  // namespace antioch

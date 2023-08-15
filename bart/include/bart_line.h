@@ -15,7 +15,7 @@ enum class BartLine {
   YELLOW_PM,
 };
 
-std::string BartLine_Name(const BartLine& line);
+const std::string BartLine_Name(const BartLine& line);
 
 }  // namespace bart
 }  // namespace antioch

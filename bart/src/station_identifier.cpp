@@ -4,7 +4,7 @@
 
 namespace antioch::bart {
 
-std::string StationIdentifier_pretty_name(const StationIdentifier id) {
+const std::string StationIdentifier_pretty_name(const StationIdentifier id) {
   switch (id) {
     case INVALID:
       return "Invalid station";
@@ -112,7 +112,7 @@ std::string StationIdentifier_pretty_name(const StationIdentifier id) {
   return "Invalid station";
 }
 
-std::string StationIdentifier_Name(const StationIdentifier id) {
+const std::string StationIdentifier_Name(const StationIdentifier id) {
   switch (id) {
     case INVALID:
       return "INVALID";

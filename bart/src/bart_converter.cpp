@@ -25,7 +25,7 @@ void BartConverter::startTracking(const Station& station) {
   {
     std::scoped_lock<std::mutex> l(stations_mtx);
     stations.emplace_back((StationIdentifier)station.id());
-    // refresh_cache(std::chrono::system_clock::now());
+    refresh_cache(std::chrono::system_clock::now());
   }
 }
 
@@ -90,7 +90,7 @@ std::vector<StationArrivals> BartConverter::convert(const std::string& data) {
   {
     std::scoped_lock<std::mutex> l(stations_mtx);
     std::vector<StationArrivals> trains;
-    for (unsigned i = 0; i < stations.size(); ++i) {
+    for (size_t i = 0; i < stations.size(); ++i) {
       std::vector<TrainArrival> arrival_vec;
       for (int j = 0; j < fm.entity_size(); ++j) {
         const auto& trip_update = fm.entity(j).trip_update();

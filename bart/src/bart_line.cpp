@@ -4,7 +4,7 @@
 
 namespace antioch::bart {
 
-std::string BartLine_Name(const BartLine& line) {
+const std::string BartLine_Name(const BartLine& line) {
   switch (line) {
     case BartLine::YELLOW:
       return "YELLOW";
