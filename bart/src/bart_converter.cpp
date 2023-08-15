@@ -66,9 +66,9 @@ std::string BartConverter::get(const Station& station) {
   throw StationGetException(msg);
 }
 
-std::vector<StationArrivals> BartConverter::convert(const std::vector<std::byte>& data) {
+std::vector<StationArrivals> BartConverter::convert(const std::string& data) {
   FeedMessage fm;
-  fm.ParseFromArray(data.data(), data.size());
+  fm.ParseFromString(data);
   auto feed_header = fm.header();
   if (feed_header.gtfs_realtime_version() != "1.0") {
     std::string msg =
@@ -90,10 +90,10 @@ std::vector<StationArrivals> BartConverter::convert(const std::vector<std::byte>
   {
     std::scoped_lock<std::mutex> l(stations_mtx);
     std::vector<StationArrivals> trains;
-    for (int i = 0; i < stations.size(); ++i) {
+    for (size_t i = 0; i < stations.size(); ++i) {
       std::vector<TrainArrival> arrival_vec;
       for (int j = 0; j < fm.entity_size(); ++j) {
-        const auto& trip_update = fm.entity(i).trip_update();
+        const auto& trip_update = fm.entity(j).trip_update();
         const TrainDescription line = line_of(trip_update);
         for (int k = 0; k < trip_update.stop_time_update_size(); ++k) {
           const auto& stop = trip_update.stop_time_update(k);
@@ -119,7 +119,7 @@ void BartConverter::refresh_cache(const std::chrono::time_point<std::chrono::sys
   update_last_fetch(now);
 
   // TODO fetch from wifi
-  std::vector<std::byte> e;
+  std::string e;
   auto converted = convert(e);
   cache.swap(converted);
 }
@@ -141,11 +141,11 @@ TrainDescription BartConverter::line_of(const TripUpdate& tu) {
   // Orange
   if (second_to_last_stop.stop_id() == StationIdentifier_Name(MLPT) &&
       second_to_last_stop.stop_sequence() == 19) {
-    return {DALY, BartLine::ORANGE};
+    return {RICH, BartLine::ORANGE};
   }
   if (second_to_last_stop.stop_id() == StationIdentifier_Name(DELN) &&
       second_to_last_stop.stop_sequence() == 19) {
-    return {DALY, BartLine::ORANGE};
+    return {BERY, BartLine::ORANGE};
   }
 
   // Yellow
@@ -194,6 +194,12 @@ TrainDescription BartConverter::line_of(const TripUpdate& tu) {
   if (second_to_last_stop.stop_id() == StationIdentifier_Name(PITT) &&
       second_to_last_stop.stop_sequence() == 24) {
     return {ANTC, BartLine::YELLOW_PM};
+  }
+
+  // Antioch extension is impossible to tell. Let's just hope it's an Antioch-bound bus
+  if (second_to_last_stop.stop_id() == StationIdentifier_Name(PCTR) &&
+      second_to_last_stop.stop_sequence() == 1) {
+    return {ANTC, BartLine::YELLOW};
   }
 
   std::string msg = "Unexpected line terminus combo: " + second_to_last_stop.stop_id() +
