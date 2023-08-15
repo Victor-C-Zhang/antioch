@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include <functional>
 #include <stdexcept>
 #include <string>
 
@@ -16,7 +17,7 @@ namespace curl_transfer {
  * @param write_cb a function that takes as input the read data
  */
 void start_transfer(const std::string& url, bool follow_redirects,
-                    void (*cb)(std::string));
+                    std::function<void(std::string)> cb);
 
 class LibCurlInternalException : public std::runtime_error {
  public:

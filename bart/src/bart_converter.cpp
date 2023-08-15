@@ -2,6 +2,7 @@
 
 #include "bart_converter.h"
 
+#include <latch.h>
 #include <transfer.h>
 #include <gtfs-realtime.pb.h>
 
@@ -117,19 +118,22 @@ void BartConverter::update_last_fetch(const std::chrono::time_point<std::chrono:
 }
 
 void BartConverter::refresh_cache(const std::chrono::time_point<std::chrono::system_clock>& now) {
-  update_last_fetch(now);
-
-  // TODO fetch from wifi
   std::string fetched;
+  antioch::connectivity::curl_transfer::Latch latch(1);
 
   auto cb = [&](std::string s) {
     fetched.swap(s);
-    
+    latch.count_down();
   };
   antioch::connectivity::curl_transfer::start_transfer("api.bart.gov/gtfsrt/tripupdate.aspx", true,
                                                        cb);
+  if (!latch.wait_or_timeout(std::chrono::seconds(2))) {
+    std::cerr << "Timed out waiting for BART API fetch!" << std::endl;
+    return;
+  }
   auto converted = convert(fetched);
   cache.swap(converted);
+  update_last_fetch(now);
 }
 
 TrainDescription BartConverter::line_of(const TripUpdate& tu) {

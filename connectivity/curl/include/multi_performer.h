@@ -5,6 +5,7 @@
 #include <curl/curl.h>
 
 #include <condition_variable>
+#include <functional>
 #include <map>
 #include <mutex>
 
@@ -13,7 +14,7 @@ namespace connectivity {
 namespace curl_transfer {
 
 typedef struct {
-  void (*finish_cb)(std::string);
+  std::function<void(std::string)> finish_cb;
   size_t size;
   char* buf;
 } EasyObj;
@@ -27,7 +28,7 @@ class MultiPerformer {
    * Queues the transfer. The function will return immediately, but the transfer will happen in the
    * background. The finish_cb will be called when the transfer is finished or errors out.
    */
-  void queue_transfer(CURL* easy_handle, void (*finish_cb)(std::string));
+  void queue_transfer(CURL* easy_handle, std::function<void(std::string)> finish_cb);
 
  private:
   void run();
