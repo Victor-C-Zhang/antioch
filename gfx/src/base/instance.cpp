@@ -2,15 +2,14 @@
 
 #include <gfx/gfx.h>
 
-#include "allocation.h"
-#include "function_impl.h"
-#include "object_impl.h"
+#include "base/function_impl.h"
+#include "base/object_base.h"
 
 namespace antioch::gfx {
 GFX_API Result createInstance(const InstanceCreateInfo& createInfo,
                               const AllocationCallback* pAllocator, Instance* pInstance) {
-  pInstance->instance = allocate<Instance_t>(pAllocator);
-  Instance_t* instance = pInstance->instance;
+  pInstance->instance = IMPL::implAllocateInstance(pAllocator);
+  base::Instance_t* instance = reinterpret_cast<base::Instance_t*>(pInstance->instance);
 
   if (!instance) {
     return Result::eOutOfMemory;
@@ -18,13 +17,21 @@ GFX_API Result createInstance(const InstanceCreateInfo& createInfo,
 
   instance->createInfo = createInfo;
 
+  Result res = IMPL::implCreateInstance(pInstance->instance);
+
+  if (res != Result::eSuccess) {
+    IMPL::implDestroyInstance(pInstance->instance, pAllocator);
+
+    return res;
+  }
+
   return Result::eSuccess;
 }
 
 GFX_API Result Instance::createDevice(const DeviceCreateInfo& createInfo,
                                       const AllocationCallback* pAllocator, Device* pDevice) {
-  pDevice->device = allocate<Device_t>(pAllocator);
-  Device_t* device = pDevice->device;
+  pDevice->device = IMPL::implAllocateDevice(pAllocator);
+  base::Device_t* device = reinterpret_cast<base::Device_t*>(pDevice->device);
 
   if (!device) {
     return Result::eOutOfMemory;
@@ -32,10 +39,11 @@ GFX_API Result Instance::createDevice(const DeviceCreateInfo& createInfo,
 
   device->createInfo = createInfo;
 
-  Result res = IMPL::implCreateDevice(createInfo, pAllocator, pDevice);
+  Result res = IMPL::implCreateDevice(pDevice->device);
 
   if (res != Result::eSuccess) {
-    deallocate<Device_t>(pAllocator, pDevice->device);
+    IMPL::implDestroyDevice(pDevice->device, pAllocator);
+
     return res;
   }
 
@@ -43,8 +51,6 @@ GFX_API Result Instance::createDevice(const DeviceCreateInfo& createInfo,
 }
 
 GFX_API Result Instance::destory(const AllocationCallback* pAllocator) {
-  deallocate<Instance_t>(pAllocator, instance);
-
-  return Result::eSuccess;
+  return IMPL::implDestroyInstance(instance, pAllocator);
 }
 }  // namespace antioch::gfx

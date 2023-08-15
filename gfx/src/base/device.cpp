@@ -2,25 +2,21 @@
 
 #include <gfx/gfx.h>
 
-#include "allocation.h"
-#include "function_impl.h"
-#include "object_impl.h"
+#include "base/function_impl.h"
+#include "base/object_base.h"
 
 namespace antioch::gfx {
 
 GFX_API Result Device::destory(const AllocationCallback* pAllocator) {
-  Result res = IMPL::implDestroyDevice(pAllocator);
-
-  deallocate<Device_t>(pAllocator, device);
-
-  return res;
+  return IMPL::implDestroyDevice(device, pAllocator);
 }
 
 GFX_API Result Device::createCommandBuffer(const CommandBufferCreateInfo& createInfo,
                                            const AllocationCallback* pAllocator,
                                            CommandBuffer* pCommandBuffer) {
-  pCommandBuffer->commandBuffer = allocate<CommandBuffer_t>(pAllocator);
-  CommandBuffer_t* commandBuffer = pCommandBuffer->commandBuffer;
+  pCommandBuffer->commandBuffer = IMPL::implAllocateCommandBuffer(pAllocator);
+  base::CommandBuffer_t* commandBuffer =
+      reinterpret_cast<base::CommandBuffer_t*>(pCommandBuffer->commandBuffer);
 
   if (!commandBuffer) {
     return Result::eOutOfMemory;
@@ -32,7 +28,7 @@ GFX_API Result Device::createCommandBuffer(const CommandBufferCreateInfo& create
 }
 
 GFX_API Result Device::submit(uint32_t submitCount, const SubmitInfo* pSubmits) {
-  return IMPL::implSubmit(submitCount, pSubmits);
+  return IMPL::implSubmit(device, submitCount, pSubmits);
 }
 
 }  // namespace antioch::gfx

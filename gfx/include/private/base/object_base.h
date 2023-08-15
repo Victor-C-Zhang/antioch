@@ -4,7 +4,7 @@
 
 #include <gfx/gfx.h>
 
-namespace antioch::gfx {
+namespace antioch::gfx::base {
 
 struct Instance_t {
   InstanceCreateInfo createInfo;
@@ -18,4 +18,4 @@ struct CommandBuffer_t {
   CommandBufferCreateInfo createInfo;
 };
 
-}  // namespace antioch::gfx
+}  // namespace antioch::gfx::base

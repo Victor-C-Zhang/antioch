@@ -71,7 +71,7 @@ FetchContent_MakeAvailable(json)
 set(protobuf_BUILD_TESTS OFF)
 FetchContent_Declare(protobuf
   DOWNLOAD_EXTRACT_TIMESTAMP 
-  URL https://github.com/protocolbuffers/protobuf/releases/download/v23.4/protobuf-23.4.tar.gz
+  URL https://github.com/protocolbuffers/protobuf/releases/download/v24.0/protobuf-24.0.tar.gz
 )
 FetchContent_MakeAvailable(protobuf)
 # Get source directory of the Protobuf
@@ -205,3 +205,13 @@ include(GoogleTest)
 add_executable(moonlight-vigil
   moonlight_vigil/main.cpp
 )
+
+find_package(SDL2 REQUIRED CONFIG REQUIRED COMPONENTS SDL2)
+find_package(SDL2 REQUIRED CONFIG REQUIRED COMPONENTS SDL2main)
+
+add_executable(sungazer
+  sungazer/main.cpp
+)
+target_link_libraries(sungazer PRIVATE antioch-gfx-sdl2)
+target_link_libraries(sungazer PRIVATE SDL2::SDL2main)
+target_link_libraries(sungazer PRIVATE SDL2::SDL2)

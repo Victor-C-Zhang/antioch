@@ -10,11 +10,17 @@
 
 #define GFX_API [[nodiscard]]
 
+#ifndef IMPL
+#define IMPL base
+#endif
+
 namespace antioch::gfx {
 
+namespace IMPL {
 class Instance_t;
 class Device_t;
 class CommandBuffer_t;
+}  // namespace IMPL
 
 class Instance;
 class Device;
@@ -28,10 +34,10 @@ class Instance {
   GFX_API Result createDevice(const DeviceCreateInfo& createInfo,
                               const AllocationCallback* pAllocator, Device* pDevice);
 
-  GFX_API Result destory(const AllocationCallback* pAllocator);
+  GFX_API Result destory(const AllocationCallback* pAllocator = nullptr);
 
  private:
-  Instance_t* instance;
+  IMPL::Instance_t* instance;
 
   friend Result createInstance(const InstanceCreateInfo& createInfo,
                                const AllocationCallback* pAllocator, Instance* pInstance);
@@ -45,20 +51,21 @@ class Device {
 
   GFX_API Result submit(uint32_t submitCount, const SubmitInfo* pSubmits);
 
-  GFX_API Result destory(const AllocationCallback* pAllocator);
+  GFX_API Result destory(const AllocationCallback* pAllocator = nullptr);
 
  private:
-  Device_t* device;
+  IMPL::Device_t* device;
 
   friend Result Instance::createDevice(const DeviceCreateInfo& createInfo,
                                        const AllocationCallback* pAllocator, Device* pDevice);
 };
 
 class CommandBuffer {
-  GFX_API Result destory(const AllocationCallback* pAllocator);
+ public:
+  GFX_API Result destory(const AllocationCallback* pAllocator = nullptr);
 
  private:
-  CommandBuffer_t* commandBuffer;
+  IMPL::CommandBuffer_t* commandBuffer;
 
   friend Result Device::createCommandBuffer(const CommandBufferCreateInfo& createInfo,
                                             const AllocationCallback* pAllocator,

@@ -7,10 +7,12 @@
 #include <cassert>
 #include <cstdlib>
 
-namespace antioch::gfx {
-void* defaultAllocate([[maybe_unused]] void* pUserData, size_t size) { return std::malloc(size); }
+namespace antioch::gfx::common {
+inline void* defaultAllocate([[maybe_unused]] void* pUserData, size_t size) {
+  return std::malloc(size);
+}
 
-void defaultFree([[maybe_unused]] void* pUserData, void* pMemory) { std::free(pMemory); }
+inline void defaultFree([[maybe_unused]] void* pUserData, void* pMemory) { std::free(pMemory); }
 
 static const AllocationCallback defaultAllocator = AllocationCallback{
     .pUserData = nullptr,
@@ -34,4 +36,4 @@ void deallocate(const AllocationCallback* pAllocator, T* pMemory) {
   pAllocator->freeFunction(pAllocator->pUserData, pMemory);
   return;
 }
-}  // namespace antioch::gfx
+}  // namespace antioch::gfx::common
