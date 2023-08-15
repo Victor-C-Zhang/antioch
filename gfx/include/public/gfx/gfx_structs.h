@@ -25,18 +25,4 @@ struct SubmitInfo {
   const CommandBuffer* pCommandBuffers;
 };
 
-struct Instance_t {
-  InstanceCreateInfo createInfo;
-};
-
-struct Device_t {
-  DeviceCreateInfo createInfo;
-};
-
-struct CommandBuffer_t {
-  CommandBufferCreateInfo createInfo;
-};
-
-struct Framebuffer_t {};
-
 };  // namespace antioch::gfx

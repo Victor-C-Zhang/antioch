@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include <gfx/gfx_enums.h>
+#include <gfx/gfx.h>
 
 #ifndef IMPL
 #define IMPL none

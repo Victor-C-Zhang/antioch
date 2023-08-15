@@ -12,6 +12,10 @@
 
 namespace antioch::gfx {
 
+class Instance_t;
+class Device_t;
+class CommandBuffer_t;
+
 class Instance;
 class Device;
 class CommandBuffer;

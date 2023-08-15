@@ -3,7 +3,8 @@
 #include <gfx/gfx.h>
 
 #include "allocation.h"
-#include "driver_impl.h"
+#include "function_impl.h"
+#include "object_impl.h"
 
 namespace antioch::gfx {
 
