@@ -47,6 +47,8 @@ add_subdirectory(gfx)
 
 set(BUILD_TESTING OFF) # to disable abseil test
 set(ABSL_ENABLE_INSTALL ON) # now you can enable install rules even in subproject... 
+set(ABSL_PROPAGATE_CXX_STD ON)  # To avoid CMake warning
+
 FetchContent_Declare(
   absl
   GIT_REPOSITORY https://github.com/abseil/abseil-cpp.git
@@ -55,7 +57,8 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(absl)
 
 FetchContent_Declare(json
-URL https://github.com/nlohmann/json/releases/download/v3.11.2/json.tar.xz
+  DOWNLOAD_EXTRACT_TIMESTAMP 
+  URL https://github.com/nlohmann/json/releases/download/v3.11.2/json.tar.xz
 )
 
 # For Windows: Prevent overriding the parent project's compiler/linker settings
@@ -67,6 +70,7 @@ FetchContent_MakeAvailable(json)
 
 set(protobuf_BUILD_TESTS OFF)
 FetchContent_Declare(protobuf
+  DOWNLOAD_EXTRACT_TIMESTAMP 
   URL https://github.com/protocolbuffers/protobuf/releases/download/v23.4/protobuf-23.4.tar.gz
 )
 FetchContent_MakeAvailable(protobuf)
