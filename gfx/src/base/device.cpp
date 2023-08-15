@@ -3,13 +3,16 @@
 #include <gfx/gfx.h>
 
 #include "allocation.h"
+#include "driver_impl.h"
 
 namespace antioch::gfx {
 
 GFX_API Result Device::destory(const AllocationCallback* pAllocator) {
+  Result res = IMPL::implDestroyDevice(pAllocator);
+
   deallocate<Device_t>(pAllocator, device);
 
-  return Result::eSuccess;
+  return res;
 }
 
 GFX_API Result Device::createCommandBuffer(const CommandBufferCreateInfo& createInfo,
@@ -26,4 +29,9 @@ GFX_API Result Device::createCommandBuffer(const CommandBufferCreateInfo& create
 
   return Result::eSuccess;
 }
+
+GFX_API Result Device::submit(uint32_t submitCount, const SubmitInfo* pSubmits) {
+  return IMPL::implSubmit(submitCount, pSubmits);
+}
+
 }  // namespace antioch::gfx

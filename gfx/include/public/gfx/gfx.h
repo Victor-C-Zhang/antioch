@@ -6,6 +6,8 @@
 #include <gfx/gfx_structs.h>
 #include <gfx/gfx_typedefs.h>
 
+#include <cstdint>
+
 #define GFX_API [[nodiscard]]
 
 namespace antioch::gfx {
@@ -36,6 +38,8 @@ class Device {
   GFX_API Result createCommandBuffer(const CommandBufferCreateInfo& createInfo,
                                      const AllocationCallback* pAllocator,
                                      CommandBuffer* pCommandBuffer);
+
+  GFX_API Result submit(uint32_t submitCount, const SubmitInfo* pSubmits);
 
   GFX_API Result destory(const AllocationCallback* pAllocator);
 

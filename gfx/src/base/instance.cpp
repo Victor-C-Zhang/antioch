@@ -3,6 +3,7 @@
 #include <gfx/gfx.h>
 
 #include "allocation.h"
+#include "driver_impl.h"
 
 namespace antioch::gfx {
 GFX_API Result createInstance(const InstanceCreateInfo& createInfo,
@@ -29,6 +30,13 @@ GFX_API Result Instance::createDevice(const DeviceCreateInfo& createInfo,
   }
 
   device->createInfo = createInfo;
+
+  Result res = IMPL::implCreateDevice(createInfo, pAllocator, pDevice);
+
+  if (res != Result::eSuccess) {
+    deallocate<Device_t>(pAllocator, pDevice->device);
+    return res;
+  }
 
   return Result::eSuccess;
 }

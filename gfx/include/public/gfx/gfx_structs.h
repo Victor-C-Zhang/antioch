@@ -4,7 +4,11 @@
 
 #include <gfx/gfx_typedefs.h>
 
+#include <cstdint>
+
 namespace antioch::gfx {
+
+class CommandBuffer;
 
 struct AllocationCallback {
   void* pUserData;
@@ -15,19 +19,24 @@ struct AllocationCallback {
 struct InstanceCreateInfo {};
 struct DeviceCreateInfo {};
 struct CommandBufferCreateInfo {};
-struct FramebufferCreateInfo {};
-struct BufferCreateInfo {};
-struct ImageViewCreateInfo {};
+
+struct SubmitInfo {
+  uint32_t commandBufferCount;
+  const CommandBuffer* pCommandBuffers;
+};
 
 struct Instance_t {
   InstanceCreateInfo createInfo;
 };
+
 struct Device_t {
   DeviceCreateInfo createInfo;
 };
+
 struct CommandBuffer_t {
   CommandBufferCreateInfo createInfo;
 };
+
 struct Framebuffer_t {};
 
 };  // namespace antioch::gfx
