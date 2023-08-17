@@ -13,5 +13,8 @@ _deps
 # build dir
 build/
 
+# release dir
+release/
+
 # VSCode
 .vscode/

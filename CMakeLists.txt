@@ -68,7 +68,7 @@ FetchContent_MakeAvailable(json)
 
 set(protobuf_BUILD_TESTS OFF)
 FetchContent_Declare(protobuf 
-  URL https://github.com/protocolbuffers/protobuf/releases/download/v24.0/protobuf-24.0.tar.gz
+  URL https://github.com/protocolbuffers/protobuf/releases/download/v23.4/protobuf-23.4.tar.gz
 )
 FetchContent_MakeAvailable(protobuf)
 # Get source directory of the Protobuf
@@ -203,16 +203,18 @@ add_executable(moonlight-vigil
   moonlight_vigil/main.cpp
 )
 
-find_package(SDL2 REQUIRED CONFIG REQUIRED COMPONENTS SDL2)
-find_package(SDL2 REQUIRED CONFIG COMPONENTS SDL2main)
+if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.22)
+  find_package(SDL2 REQUIRED CONFIG REQUIRED COMPONENTS SDL2)
+  find_package(SDL2 REQUIRED CONFIG COMPONENTS SDL2main)
 
-add_executable(sungazer
-  sungazer/main.cpp
-)
-target_link_libraries(sungazer PRIVATE antioch-gfx-sdl2)
+  add_executable(sungazer
+    sungazer/main.cpp
+  )
+  target_link_libraries(sungazer PRIVATE antioch-gfx-sdl2)
 
-if(TARGET SDL2::SDL2main)
-    target_link_libraries(sungazer PRIVATE SDL2::SDL2main)
+  if(TARGET SDL2::SDL2main)
+      target_link_libraries(sungazer PRIVATE SDL2::SDL2main)
+  endif()
+
+  target_link_libraries(sungazer PRIVATE SDL2::SDL2)
 endif()
-
-target_link_libraries(sungazer PRIVATE SDL2::SDL2)
