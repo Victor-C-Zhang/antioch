@@ -7,10 +7,10 @@
 #include "common/allocation.h"
 #include "sdl2/objects.h"
 
-namespace antioch::gfx::IMPL {
+namespace antioch::gfx {
 
 Instance_t* implAllocateInstance(const AllocationCallback* pAllocator) {
-  return antioch::gfx::common::allocate<Instance_t>(pAllocator);
+  return antioch::gfx::common::allocate<SDL2Instance_t>(pAllocator);
 }
 
 Result implCreateInstance(Instance_t* instance) {
@@ -20,12 +20,13 @@ Result implCreateInstance(Instance_t* instance) {
   }
   return Result::eSuccess;
 }
-Result implDestroyInstance(Instance_t* instance, const AllocationCallback* pAllocator) {
+Result implDestroyInstance(Instance_t* baseInstance, const AllocationCallback* pAllocator) {
   SDL_Quit();
+  SDL2Instance_t* instance = static_cast<SDL2Instance_t*>(baseInstance);
 
-  antioch::gfx::common::deallocate<Instance_t>(pAllocator, instance);
+  antioch::gfx::common::deallocate<SDL2Instance_t>(pAllocator, instance);
 
   return Result::eSuccess;
 }
 
-}  // namespace antioch::gfx::IMPL
+}  // namespace antioch::gfx

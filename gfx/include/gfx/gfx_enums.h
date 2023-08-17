@@ -10,4 +10,4 @@ enum class Result {
   eOutOfMemory,
 };
 
-};  // namespace antioch::gfx
+}  // namespace antioch::gfx

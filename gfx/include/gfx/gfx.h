@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include <gfx/gfx_constants.h>
 #include <gfx/gfx_enums.h>
 #include <gfx/gfx_structs.h>
 #include <gfx/gfx_typedefs.h>
@@ -10,17 +11,11 @@
 
 #define GFX_API [[nodiscard]]
 
-#ifndef IMPL
-#define IMPL base
-#endif
-
 namespace antioch::gfx {
 
-namespace IMPL {
 class Instance_t;
 class Device_t;
 class CommandBuffer_t;
-}  // namespace IMPL
 
 class Instance;
 class Device;
@@ -37,7 +32,7 @@ class Instance {
   GFX_API Result destory(const AllocationCallback* pAllocator = nullptr);
 
  private:
-  IMPL::Instance_t* instance;
+  Instance_t* instance;
 
   friend Result createInstance(const InstanceCreateInfo& createInfo,
                                const AllocationCallback* pAllocator, Instance* pInstance);
@@ -54,7 +49,7 @@ class Device {
   GFX_API Result destory(const AllocationCallback* pAllocator = nullptr);
 
  private:
-  IMPL::Device_t* device;
+  Device_t* device;
 
   friend Result Instance::createDevice(const DeviceCreateInfo& createInfo,
                                        const AllocationCallback* pAllocator, Device* pDevice);
@@ -62,14 +57,22 @@ class Device {
 
 class CommandBuffer {
  public:
+  GFX_API Result begin(const CommandBufferBeginInfo& beginInfo);
+  GFX_API Result bindBrush(const BrushInfo& brushInfo);
+  GFX_API Result bindFont(const FontInfo& fontInfo);
+  GFX_API Result drawText(const char* text, size_t textSize);
+  GFX_API Result end();
+
   GFX_API Result destory(const AllocationCallback* pAllocator = nullptr);
 
  private:
-  IMPL::CommandBuffer_t* commandBuffer;
+  CommandBuffer_t* commandBuffer;
 
   friend Result Device::createCommandBuffer(const CommandBufferCreateInfo& createInfo,
                                             const AllocationCallback* pAllocator,
                                             CommandBuffer* pCommandBuffer);
+
+  friend Result Device::submit(uint32_t submitCount, const SubmitInfo* pSubmits);
 };
 
 }  // namespace antioch::gfx

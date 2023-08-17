@@ -210,6 +210,7 @@ if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.22 AND CMAKE_BUILD_TYPE STREQUAL "Debug
   add_executable(sungazer
     sungazer/main.cpp
   )
+  add_dependencies(sungazer antioch-gfx-sdl2)
   target_link_libraries(sungazer PRIVATE antioch-gfx-sdl2)
 
   if(TARGET SDL2::SDL2main)

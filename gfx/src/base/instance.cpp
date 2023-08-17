@@ -8,8 +8,8 @@
 namespace antioch::gfx {
 GFX_API Result createInstance(const InstanceCreateInfo& createInfo,
                               const AllocationCallback* pAllocator, Instance* pInstance) {
-  pInstance->instance = IMPL::implAllocateInstance(pAllocator);
-  base::Instance_t* instance = reinterpret_cast<base::Instance_t*>(pInstance->instance);
+  pInstance->instance = implAllocateInstance(pAllocator);
+  Instance_t* instance = reinterpret_cast<Instance_t*>(pInstance->instance);
 
   if (!instance) {
     return Result::eOutOfMemory;
@@ -17,10 +17,10 @@ GFX_API Result createInstance(const InstanceCreateInfo& createInfo,
 
   instance->createInfo = createInfo;
 
-  Result res = IMPL::implCreateInstance(pInstance->instance);
+  Result res = implCreateInstance(pInstance->instance);
 
   if (res != Result::eSuccess) {
-    IMPL::implDestroyInstance(pInstance->instance, pAllocator);
+    implDestroyInstance(pInstance->instance, pAllocator);
 
     return res;
   }
@@ -30,8 +30,8 @@ GFX_API Result createInstance(const InstanceCreateInfo& createInfo,
 
 GFX_API Result Instance::createDevice(const DeviceCreateInfo& createInfo,
                                       const AllocationCallback* pAllocator, Device* pDevice) {
-  pDevice->device = IMPL::implAllocateDevice(pAllocator);
-  base::Device_t* device = reinterpret_cast<base::Device_t*>(pDevice->device);
+  pDevice->device = implAllocateDevice(pAllocator);
+  Device_t* device = reinterpret_cast<Device_t*>(pDevice->device);
 
   if (!device) {
     return Result::eOutOfMemory;
@@ -39,10 +39,10 @@ GFX_API Result Instance::createDevice(const DeviceCreateInfo& createInfo,
 
   device->createInfo = createInfo;
 
-  Result res = IMPL::implCreateDevice(pDevice->device);
+  Result res = implCreateDevice(pDevice->device);
 
   if (res != Result::eSuccess) {
-    IMPL::implDestroyDevice(pDevice->device, pAllocator);
+    implDestroyDevice(pDevice->device, pAllocator);
 
     return res;
   }
@@ -51,6 +51,6 @@ GFX_API Result Instance::createDevice(const DeviceCreateInfo& createInfo,
 }
 
 GFX_API Result Instance::destory(const AllocationCallback* pAllocator) {
-  return IMPL::implDestroyInstance(instance, pAllocator);
+  return implDestroyInstance(instance, pAllocator);
 }
 }  // namespace antioch::gfx

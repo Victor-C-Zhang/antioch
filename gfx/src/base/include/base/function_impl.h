@@ -6,8 +6,6 @@
 
 namespace antioch::gfx {
 
-namespace IMPL {
-
 class Instance_t;
 class Device_t;
 class CommandBuffer_t;
@@ -25,7 +23,5 @@ Result implSubmit(Device_t* device, uint32_t submitCount, const SubmitInfo* pSub
 
 Result implDestroyCommandBuffer(CommandBuffer_t* commandBuffer,
                                 const AllocationCallback* pAllocator);
-
-}  // namespace IMPL
 
 }  // namespace antioch::gfx

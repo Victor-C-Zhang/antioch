@@ -19,10 +19,14 @@ int main(int argc, char *argv[]) {
   device.createCommandBuffer(cmdBufInfo, nullptr, &cmdBuf[0]);
   device.createCommandBuffer(cmdBufInfo, nullptr, &cmdBuf[1]);
 
+  CommandBufferBeginInfo beginInfo{};
+  cmdBuf[0].begin(beginInfo);
+  cmdBuf[0].end();
+
   SubmitInfo submitInfo[2] = {SubmitInfo{.commandBufferCount = 1, .pCommandBuffers = &cmdBuf[0]},
                               SubmitInfo{.commandBufferCount = 1, .pCommandBuffers = &cmdBuf[1]}};
 
-  device.submit(2, submitInfo);
+  device.submit(1, submitInfo);
 
   bool quit = false;
   SDL_Event e;

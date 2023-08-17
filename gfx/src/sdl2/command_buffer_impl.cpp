@@ -5,15 +5,17 @@
 #include "common/allocation.h"
 #include "sdl2/objects.h"
 
-namespace antioch::gfx::IMPL {
+namespace antioch::gfx {
 CommandBuffer_t* implAllocateCommandBuffer(const AllocationCallback* pAllocator) {
-  return antioch::gfx::common::allocate<CommandBuffer_t>(pAllocator);
+  return antioch::gfx::common::allocate<SDL2CommandBuffer_t>(pAllocator);
 }
 
-Result implDestroyCommandBuffer(CommandBuffer_t* commandBuffer,
+Result implDestroyCommandBuffer(CommandBuffer_t* baseCommandBuffer,
                                 const AllocationCallback* pAllocator) {
-  antioch::gfx::common::deallocate<CommandBuffer_t>(pAllocator, commandBuffer);
+  SDL2CommandBuffer_t* commandBuffer = static_cast<SDL2CommandBuffer_t*>(baseCommandBuffer);
+
+  antioch::gfx::common::deallocate<SDL2CommandBuffer_t>(pAllocator, commandBuffer);
   return Result::eSuccess;
 }
 
-}  // namespace antioch::gfx::IMPL
+}  // namespace antioch::gfx

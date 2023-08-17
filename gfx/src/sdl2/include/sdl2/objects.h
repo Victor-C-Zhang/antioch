@@ -6,26 +6,18 @@
 
 #include "base/object_base.h"
 
-#ifndef IMPL
-#define IMPL sdl2
-#endif
-
 struct SDL_Window;
 struct SDL_Renderer;
 
 namespace antioch::gfx {
 
-namespace IMPL {
+struct SDL2Instance_t : public Instance_t {};
 
-struct Instance_t : public antioch::gfx::base::Instance_t {};
-
-struct Device_t : public antioch::gfx::base::Device_t {
+struct SDL2Device_t : public Device_t {
   SDL_Window* window = nullptr;
   SDL_Renderer* renderer = nullptr;
 };
 
-struct CommandBuffer_t : public antioch::gfx::base::CommandBuffer_t {};
-
-}  // namespace IMPL
+struct SDL2CommandBuffer_t : public CommandBuffer_t {};
 
 }  // namespace antioch::gfx
