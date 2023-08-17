@@ -10,7 +10,7 @@ add_compile_options(
 add_subdirectory(tests)
 
 # Simulator backend
-if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.22)
+if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.22 AND CMAKE_BUILD_TYPE STREQUAL "Debug")
 
   find_package(SDL2 REQUIRED CONFIG REQUIRED COMPONENTS SDL2)
   
