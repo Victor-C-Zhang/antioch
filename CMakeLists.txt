@@ -1,10 +1,9 @@
-cmake_minimum_required(VERSION 3.24)
+cmake_minimum_required(VERSION 3.16)
 include (FetchContent)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS ON)
-cmake_policy(SET CMP0135 NEW)
 project(antioch)
 
 # Make the default build type Release. If user or another
@@ -205,11 +204,15 @@ add_executable(moonlight-vigil
 )
 
 find_package(SDL2 REQUIRED CONFIG REQUIRED COMPONENTS SDL2)
-find_package(SDL2 REQUIRED CONFIG REQUIRED COMPONENTS SDL2main)
+find_package(SDL2 REQUIRED CONFIG COMPONENTS SDL2main)
 
 add_executable(sungazer
   sungazer/main.cpp
 )
 target_link_libraries(sungazer PRIVATE antioch-gfx-sdl2)
-target_link_libraries(sungazer PRIVATE SDL2::SDL2main)
+
+if(TARGET SDL2::SDL2main)
+    target_link_libraries(sungazer PRIVATE SDL2::SDL2main)
+endif()
+
 target_link_libraries(sungazer PRIVATE SDL2::SDL2)
