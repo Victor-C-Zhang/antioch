@@ -21,11 +21,18 @@ static const AllocationCallback defaultAllocator = AllocationCallback{
 };
 
 template <class T>
-T* allocate(const AllocationCallback* pAllocator) {
+inline T* allocate(const AllocationCallback* pAllocator) {
   if (pAllocator == nullptr) {
     pAllocator = &defaultAllocator;
   }
   return reinterpret_cast<T*>(pAllocator->allocationFunction(pAllocator->pUserData, sizeof(T)));
+}
+
+inline void* allocate(const AllocationCallback* pAllocator, size_t size) {
+  if (pAllocator == nullptr) {
+    pAllocator = &defaultAllocator;
+  }
+  return pAllocator->allocationFunction(pAllocator->pUserData, size);
 }
 
 template <class T>

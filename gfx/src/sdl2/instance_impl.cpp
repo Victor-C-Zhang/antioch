@@ -13,7 +13,7 @@ Instance_t* implAllocateInstance(const AllocationCallback* pAllocator) {
   return antioch::gfx::common::allocate<SDL2Instance_t>(pAllocator);
 }
 
-Result implCreateInstance(Instance_t* instance) {
+Result implCreateInstance([[maybe_unused]] Instance_t* instance) {
   if (SDL_Init(SDL_INIT_EVERYTHING) < 0) {
     printf("SDL could not initialize! SDL_Error: %s\n", SDL_GetError());
     return Result::eSystemError;

@@ -44,6 +44,9 @@ class Device {
                                      const AllocationCallback* pAllocator,
                                      CommandBuffer* pCommandBuffer);
 
+  GFX_API Result allocateMemory(const MemoryAllocateInfo& allocInfo,
+                                const AllocationCallback* pAllocator, DeviceMemory* pDeviceMemory);
+
   GFX_API Result submit(uint32_t submitCount, const SubmitInfo* pSubmits);
 
   GFX_API Result destory(const AllocationCallback* pAllocator = nullptr);
@@ -59,7 +62,7 @@ class CommandBuffer {
  public:
   GFX_API Result begin(const CommandBufferBeginInfo& beginInfo);
   GFX_API Result bindBrush(const BrushInfo& brushInfo);
-  GFX_API Result bindFont(const FontInfo& fontInfo);
+  GFX_API Result bindGlyph(const GlyphInfo& fontInfo);
   GFX_API Result drawText(const char* text, size_t textSize);
   GFX_API Result end();
 

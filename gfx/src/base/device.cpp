@@ -4,6 +4,7 @@
 
 #include "base/function_impl.h"
 #include "base/object_base.h"
+#include "common/allocation.h"
 
 namespace antioch::gfx {
 
@@ -23,6 +24,23 @@ GFX_API Result Device::createCommandBuffer(const CommandBufferCreateInfo& create
   }
 
   commandBuffer->createInfo = createInfo;
+
+  return Result::eSuccess;
+}
+
+GFX_API Result Device::allocateMemory(const MemoryAllocateInfo& allocInfo,
+                                      const AllocationCallback* pAllocator,
+                                      DeviceMemory* pDeviceMemory) {
+  DeviceMemory deviceMemory = antioch::gfx::common::allocate<DeviceMemory_t>(pAllocator);
+
+  if (!deviceMemory) {
+    return Result::eOutOfMemory;
+  }
+
+  deviceMemory->allocInfo = allocInfo;
+  deviceMemory->data = antioch::gfx::common::allocate(pAllocator, allocInfo.allocationSize);
+
+  *pDeviceMemory = deviceMemory;
 
   return Result::eSuccess;
 }
