@@ -50,7 +50,7 @@ GFX_API Result Instance::createDevice(const DeviceCreateInfo& createInfo,
   return Result::eSuccess;
 }
 
-GFX_API Result Instance::destory(const AllocationCallback* pAllocator) {
+GFX_API Result Instance::destroy(const AllocationCallback* pAllocator) {
   return implDestroyInstance(instance, pAllocator);
 }
 }  // namespace antioch::gfx

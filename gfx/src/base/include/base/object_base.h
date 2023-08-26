@@ -4,6 +4,8 @@
 
 #include <gfx/gfx.h>
 
+#include <limits>
+
 namespace antioch::gfx {
 
 struct Instance_t {
@@ -13,17 +15,19 @@ struct Instance_t {
 struct Device_t {
   DeviceCreateInfo createInfo;
 
-  uint8_t screen[64 * 64 * 3];
+  uint8_t screen[SCREEN_WIDTH * SCREEN_HEIGHT * NUM_CHANNELS];
 };
 
 struct CommandBuffer_t {
   struct Prim {
-    uint8_t data[8];
-    BrushInfo brush;
+    Glyph glyph;
+    Vector2D offset;
   };
 
   struct DrawData {
     Vector2D origin;
+    uint32_t numPrims;
+    Brush brush;
     Prim prims[MAX_PRIMS_PER_DRAW];
   };
 
@@ -32,14 +36,31 @@ struct CommandBuffer_t {
   ColourRGB clearColour;
 
   struct State {
-    BrushInfo brush;
-    GlyphInfo font;
+    Brush brush;
+    Glyph font[std::numeric_limits<uint8_t>::max()];
+
+    uint32_t numDraws;
+    DrawData drawData[MAX_DRAWS_PER_BUFFER];
   } state;
 };
 
 struct DeviceMemory_t {
   MemoryAllocateInfo allocInfo;
   void* data;
+};
+
+struct Image_t {
+  ImageCreateInfo createInfo;
+  DeviceMemory memory;
+  size_t memoryOffset;
+};
+
+struct Brush_t {
+  BrushCreateInfo createInfo;
+};
+
+struct Glyph_t {
+  GlyphCreateInfo createInfo;
 };
 
 }  // namespace antioch::gfx

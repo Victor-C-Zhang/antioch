@@ -14,11 +14,11 @@ namespace {
 constexpr uint32_t CELL_WIDTH = 30;
 constexpr uint32_t CELL_HEIGHT = 30;
 
-constexpr uint32_t SCREEN_WIDTH_CELLS = 64;
-constexpr uint32_t SCREEN_HEIGHT_CELLS = 32;
+constexpr uint32_t SCREEN_WIDTH_CELLS = SCREEN_WIDTH;
+constexpr uint32_t SCREEN_HEIGHT_CELLS = SCREEN_HEIGHT;
 
-constexpr uint32_t SCREEN_WIDTH = CELL_WIDTH * SCREEN_WIDTH_CELLS;
-constexpr uint32_t SCREEN_HEIGHT = CELL_HEIGHT * SCREEN_HEIGHT_CELLS;
+constexpr uint32_t PIXEL_SCREEN_WIDTH = CELL_WIDTH * SCREEN_WIDTH_CELLS;
+constexpr uint32_t PIXEL_SCREEN_HEIGHT = CELL_HEIGHT * SCREEN_HEIGHT_CELLS;
 
 void drawCircle(SDL_Renderer* renderer, int x, int y, int radius) {
   for (int w = 0; w < radius * 2; w++) {
@@ -41,9 +41,9 @@ Device_t* implAllocateDevice(const AllocationCallback* pAllocator) {
 Result implCreateDevice(Device_t* baseDevice) {
   SDL2Device_t* device = static_cast<SDL2Device_t*>(baseDevice);
   // Create window
-  device->window =
-      SDL_CreateWindow("Sungazer - An Antioch Simulator", SDL_WINDOWPOS_CENTERED,
-                       SDL_WINDOWPOS_CENTERED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
+  device->window = SDL_CreateWindow("Sungazer - An Antioch Simulator", SDL_WINDOWPOS_CENTERED,
+                                    SDL_WINDOWPOS_CENTERED, PIXEL_SCREEN_WIDTH, PIXEL_SCREEN_HEIGHT,
+                                    SDL_WINDOW_SHOWN);
   if (device->window == nullptr) {
     printf("Window could not be created! SDL_Error: %s\n", SDL_GetError());
     return Result::eSystemError;

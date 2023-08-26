@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include <gfx/gfx_enums.h>
 #include <gfx/gfx_typedefs.h>
 
 #include <cstdint>
@@ -25,11 +26,16 @@ struct Vector3D {
 struct Vector2D {
   float x;
   float y;
-};
 
-struct GlyphLetter {
-  uint8_t value;
-  uint8_t data[8];
+  inline Vector2D operator+(const Vector2D& other) const {
+    return {.x = x + other.x, .y = y + other.y};
+  }
+
+  inline Vector2D& operator+=(const Vector2D& other) {
+    x += other.x;
+    y += other.y;
+    return *this;
+  }
 };
 
 struct AllocationCallback {
@@ -46,16 +52,22 @@ struct MemoryAllocateInfo {
   size_t allocationSize;
 };
 
-struct CommandBufferBeginInfo {
-  ColourRGB clearColour;
+struct ImageCreateInfo {
+  Vector2D extents;
+  ImageFormat format;
 };
 
-struct BrushInfo {
+struct BrushCreateInfo {
   ColourRGB brushColour;
 };
 
-struct GlyphInfo {
-  GlyphLetter letters[3];
+struct GlyphCreateInfo {
+  uint8_t value;
+  Image image;
+};
+
+struct CommandBufferBeginInfo {
+  ColourRGB clearColour;
 };
 
 struct SubmitInfo {

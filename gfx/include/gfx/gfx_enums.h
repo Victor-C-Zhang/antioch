@@ -10,4 +10,9 @@ enum class Result {
   eOutOfMemory,
 };
 
+enum class ImageFormat {
+  eR8G8B8Uint,
+  eA1Uint,
+};
+
 }  // namespace antioch::gfx
