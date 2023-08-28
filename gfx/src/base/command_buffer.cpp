@@ -35,7 +35,7 @@ GFX_API Result CommandBuffer::drawText(const char* text, uint32_t textCount,
   currDraw.numPrims = textCount;
   currDraw.brush = commandBuffer->state.brush;
 
-  Vector2D offset = {.x = 9, .y = 0};
+  Vector2D offset = {.x = 6, .y = 0};
 
   for (uint32_t i = 0; i < textCount; ++i) {
     currDraw.prims[i].glyph = commandBuffer->state.font[static_cast<uint8_t>(text[i])];

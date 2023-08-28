@@ -96,9 +96,9 @@ Result implSubmit(Device_t* baseDevice, [[maybe_unused]] uint32_t submitCount,
       uint8_t b = device->screen[j * SCREEN_WIDTH_CELLS * 3 + i * 3 + 2];
       if (r + g + b > 0) {
         SDL_SetRenderDrawColor(device->renderer, r, g, b, 0xFF);
-
-        drawCircle(device->renderer, i * CELL_WIDTH + CELL_WIDTH / 2,
-                   j * CELL_HEIGHT + CELL_HEIGHT / 2, 10);
+        SDL_FRect rect = {(float)i * CELL_WIDTH + 4, (float)j * CELL_HEIGHT + 4, CELL_WIDTH - 8,
+                          CELL_HEIGHT - 8};
+        SDL_RenderFillRectF(device->renderer, &rect);
       }
     }
   }

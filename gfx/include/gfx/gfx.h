@@ -43,6 +43,8 @@ class Device {
   GFX_API Result createCommandBuffer(const CommandBufferCreateInfo& createInfo,
                                      const AllocationCallback* pAllocator,
                                      CommandBuffer* pCommandBuffer);
+  GFX_API Result createBuffer(const BufferCreateInfo& createInfo,
+                              const AllocationCallback* pAllocator, Buffer* pBuffer);
   GFX_API Result createImage(const ImageCreateInfo& createInfo,
                              const AllocationCallback* pAllocator, Image* pImage);
   GFX_API Result createBrush(const BrushCreateInfo& createInfo,
@@ -55,10 +57,12 @@ class Device {
   GFX_API Result mapMemory(const DeviceMemory& memory, void** ppData);
 
   GFX_API Result bindImage(const DeviceMemory& memory, Image& image, size_t offset);
+  GFX_API Result bindBuffer(const DeviceMemory& memory, Buffer& buffer, size_t offset);
 
   GFX_API Result submit(uint32_t submitCount, const SubmitInfo* pSubmits);
 
   GFX_API Result destroy(const AllocationCallback* pAllocator = nullptr);
+  GFX_API Result destroyBuffer(Buffer& buffer, const AllocationCallback* pAllocator = nullptr);
   GFX_API Result destroyImage(Image& image, const AllocationCallback* pAllocator = nullptr);
   GFX_API Result destroyBrush(Brush& brush, const AllocationCallback* pAllocator = nullptr);
   GFX_API Result destroyGlyph(Glyph& glyph, const AllocationCallback* pAllocator = nullptr);

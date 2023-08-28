@@ -51,6 +51,21 @@ GFX_API Result Device::mapMemory(const DeviceMemory& memory, void** ppData) {
   return Result::eSuccess;
 }
 
+GFX_API Result Device::createBuffer(const BufferCreateInfo& createInfo,
+                                    const AllocationCallback* pAllocator, Buffer* pBuffer) {
+  Buffer buffer = antioch::gfx::common::allocate<Buffer_t>(pAllocator);
+
+  if (!buffer) {
+    return Result::eOutOfMemory;
+  }
+
+  buffer->createInfo = createInfo;
+
+  *pBuffer = buffer;
+
+  return Result::eSuccess;
+}
+
 GFX_API Result Device::createImage(const ImageCreateInfo& createInfo,
                                    const AllocationCallback* pAllocator, Image* pImage) {
   Image image = antioch::gfx::common::allocate<Image_t>(pAllocator);
@@ -83,6 +98,12 @@ GFX_API Result Device::createBrush(const BrushCreateInfo& createInfo,
 
 GFX_API Result Device::createGlyph(const GlyphCreateInfo& createInfo,
                                    const AllocationCallback* pAllocator, Glyph* pGlyph) {
+  if (createInfo.extent.x > 8 || createInfo.extent.y > 8) {
+    return Result::eInvalidParameter;
+  }
+  if (createInfo.extent.x == 0 || createInfo.extent.y == 0) {
+    return Result::eInvalidParameter;
+  }
   Glyph glyph = antioch::gfx::common::allocate<Glyph_t>(pAllocator);
 
   if (!glyph) {
@@ -99,6 +120,13 @@ GFX_API Result Device::createGlyph(const GlyphCreateInfo& createInfo,
 GFX_API Result Device::bindImage(const DeviceMemory& memory, Image& image, size_t offset) {
   image->memory = memory;
   image->memoryOffset = offset;
+
+  return Result::eSuccess;
+}
+
+GFX_API Result Device::bindBuffer(const DeviceMemory& memory, Buffer& buffer, size_t offset) {
+  buffer->memory = memory;
+  buffer->memoryOffset = offset;
 
   return Result::eSuccess;
 }
@@ -125,17 +153,27 @@ GFX_API Result Device::submit(uint32_t submitCount, const SubmitInfo* pSubmits) 
           offset += state.drawData[drawIdx].prims[primIdx].offset;
           Glyph glyph = state.drawData[drawIdx].prims[primIdx].glyph;
 
-          uint8_t* pData = static_cast<uint8_t*>(glyph->createInfo.image->memory->data);
-          for (uint32_t x = 0; x < 8; ++x) {
-            for (uint32_t y = 0; y < 8; ++y) {
+          uint8_t* pData = static_cast<uint8_t*>(glyph->createInfo.buffer->memory->data);
+          for (uint32_t x = 0; x < glyph->createInfo.extent.x; ++x) {
+            for (uint32_t y = 0; y < glyph->createInfo.extent.y; ++y) {
               if (x + offset.x >= SCREEN_WIDTH || y + offset.y >= SCREEN_HEIGHT) {
                 continue;
               }
               uint32_t screenIdx = ((y + offset.y) * SCREEN_WIDTH + x + offset.x) * NUM_CHANNELS;
 
-              uint32_t memoryIdx = glyph->createInfo.image->memoryOffset + y;
+              uint32_t memoryIdx =
+                  glyph->createInfo.buffer->memoryOffset + glyph->createInfo.bufferOffset;
+              uint32_t dataBit = 0;
 
-              if ((1 << (7 - x)) & pData[memoryIdx]) {
+              if (glyph->createInfo.isColMajor) {
+                memoryIdx += x * glyph->createInfo.strideBytes;
+                dataBit += y;
+              } else {
+                memoryIdx += y * glyph->createInfo.strideBytes;
+                dataBit += glyph->createInfo.extent.x - 1 - x;
+              }
+
+              if ((1 << dataBit) & pData[memoryIdx]) {
                 device->screen[screenIdx] = brush->createInfo.brushColour.r;
                 device->screen[screenIdx + 1] = brush->createInfo.brushColour.g;
                 device->screen[screenIdx + 2] = brush->createInfo.brushColour.b;
@@ -148,6 +186,11 @@ GFX_API Result Device::submit(uint32_t submitCount, const SubmitInfo* pSubmits) 
   }
 
   return implSubmit(device, submitCount, pSubmits);
+}
+
+GFX_API Result Device::destroyBuffer(Buffer& buffer, const AllocationCallback* pAllocator) {
+  antioch::gfx::common::deallocate<Buffer_t>(pAllocator, buffer);
+  return Result::eSuccess;
 }
 
 GFX_API Result Device::destroyImage(Image& image, const AllocationCallback* pAllocator) {

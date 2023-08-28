@@ -2,6 +2,7 @@
 
 #include <SDL2/SDL.h>
 #include <gfx/gfx.h>
+#include <gfx/gfx_helpers.h>
 
 #include <cassert>
 #include <string>
@@ -25,39 +26,36 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
   CHECK_ERROR(device.createCommandBuffer(cmdBufInfo, nullptr, &cmdBuf[1]));
 
   MemoryAllocateInfo allocInfo{};
-  allocInfo.allocationSize = 3 * sizeof(default_glyphs::kL);
+  allocInfo.allocationSize = sizeof(default_glyphs::kFonts);
 
   DeviceMemory memory;
   CHECK_ERROR(device.allocateMemory(allocInfo, nullptr, &memory));
 
   uint8_t* pMemory = nullptr;
   CHECK_ERROR(device.mapMemory(memory, reinterpret_cast<void**>(&pMemory)));
-  memcpy(pMemory, default_glyphs::kL, sizeof(default_glyphs::kL));
-  memcpy(pMemory + sizeof(default_glyphs::kL), default_glyphs::kE, sizeof(default_glyphs::kE));
-  memcpy(pMemory + sizeof(default_glyphs::kL) * 2, default_glyphs::kO, sizeof(default_glyphs::kO));
+  memcpy(pMemory, default_glyphs::kFonts, sizeof(default_glyphs::kFonts));
 
-  ImageCreateInfo imageInfo{};
-  imageInfo.format = ImageFormat::eA1Uint;
-  imageInfo.extents = {.x = 8, .y = 8};
+  BufferCreateInfo bufferInfo{};
+  bufferInfo.size = sizeof(default_glyphs::kFonts);
 
-  Image images[3];
-  for (uint32_t i = 0; i < 3; ++i) {
-    CHECK_ERROR(device.createImage(imageInfo, nullptr, &images[i]));
-    CHECK_ERROR(device.bindImage(memory, images[i], i * sizeof(default_glyphs::kL)));
-  }
+  Buffer buffer;
+  CHECK_ERROR(device.createBuffer(bufferInfo, nullptr, &buffer));
+  CHECK_ERROR(device.bindBuffer(memory, buffer, 0));
 
   GlyphCreateInfo glyphInfo{};
+  glyphInfo.isColMajor = true;
+  glyphInfo.buffer = buffer;
+  glyphInfo.strideBytes = 1;
+  glyphInfo.extent.x = 5;
+  glyphInfo.extent.y = 7;
 
-  Glyph glyphs[3];
-  glyphInfo.image = images[0];
-  glyphInfo.value = 'L';
-  CHECK_ERROR(device.createGlyph(glyphInfo, nullptr, &glyphs[0]));
-  glyphInfo.image = images[1];
-  glyphInfo.value = 'E';
-  CHECK_ERROR(device.createGlyph(glyphInfo, nullptr, &glyphs[1]));
-  glyphInfo.image = images[2];
-  glyphInfo.value = 'O';
-  CHECK_ERROR(device.createGlyph(glyphInfo, nullptr, &glyphs[2]));
+  Glyph glyphs[255];
+
+  for (uint32_t i = 0; i < 255; i++) {
+    glyphInfo.value = i;
+    glyphInfo.bufferOffset = i * 5 * sizeof(uint8_t);
+    CHECK_ERROR(device.createGlyph(glyphInfo, nullptr, &glyphs[i]));
+  }
 
   BrushCreateInfo brushInfo{};
   brushInfo.brushColour = {.r = 0x00, .g = 0xFF, .b = 0x00};
@@ -65,15 +63,22 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
   CHECK_ERROR(device.createBrush(brushInfo, nullptr, &brush));
 
   CommandBufferBeginInfo beginInfo{};
-  beginInfo.clearColour.r = 0xFF;
+  beginInfo.clearColour.r = 0x80;
+  beginInfo.clearColour.g = 0x80;
+  beginInfo.clearColour.b = 0x80;
   CHECK_ERROR(cmdBuf[0].reset());
   CHECK_ERROR(cmdBuf[0].begin(beginInfo));
   CHECK_ERROR(cmdBuf[0].bindBrush(brush));
-  CHECK_ERROR(cmdBuf[0].bindGlyph(3, glyphs));
+  CHECK_ERROR(cmdBuf[0].bindGlyph(255, glyphs));
 
-  std::string text = "LEOOOOOOOEE";
+  std::string text1 = "Hello...";
+  std::string text2 = "world?";
+  std::string text3 = "@antioch";
 
-  CHECK_ERROR(cmdBuf[0].drawText(text.c_str(), text.size(), {.x = 1, .y = 1}));
+  CHECK_ERROR(cmdBuf[0].drawText(text1.c_str(), text1.size(), {.x = 1, .y = 1}));
+  CHECK_ERROR(cmdBuf[0].drawText(text2.c_str(), text2.size(), {.x = 1, .y = 9}));
+  CHECK_ERROR(cmdBuf[0].drawText(text3.c_str(), text3.size(), {.x = 1, .y = 17}));
+
   CHECK_ERROR(cmdBuf[0].end());
 
   SubmitInfo submitInfo[2] = {SubmitInfo{.commandBufferCount = 1, .pCommandBuffers = &cmdBuf[0]},
@@ -95,10 +100,11 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
 
   CHECK_ERROR(device.destroyBrush(brush));
 
-  for (uint32_t i = 0; i < 3; i++) {
+  for (uint32_t i = 0; i < 255; i++) {
     CHECK_ERROR(device.destroyGlyph(glyphs[i]));
-    CHECK_ERROR(device.destroyImage(images[i]));
   }
+
+  CHECK_ERROR(device.destroyBuffer(buffer));
 
   CHECK_ERROR(device.freeMemory(memory));
 

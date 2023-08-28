@@ -49,6 +49,12 @@ struct DeviceMemory_t {
   void* data;
 };
 
+struct Buffer_t {
+  BufferCreateInfo createInfo;
+  DeviceMemory memory;
+  size_t memoryOffset;
+};
+
 struct Image_t {
   ImageCreateInfo createInfo;
   DeviceMemory memory;
