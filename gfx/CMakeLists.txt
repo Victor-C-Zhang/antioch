@@ -7,8 +7,6 @@ add_compile_options(
   -fno-exceptions
 )
 
-add_subdirectory(tests)
-
 add_library(antioch-gfx-base-lib ${BASE_SRCS})
 target_include_directories(antioch-gfx-base-lib
   PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/base/include
@@ -34,3 +32,5 @@ if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.22 AND CMAKE_BUILD_TYPE STREQUAL "Debug
   add_dependencies(antioch-gfx-sdl2 antioch-gfx-base-lib antioch-gfx-sdl2-lib)
   target_link_libraries(antioch-gfx-sdl2 INTERFACE antioch-gfx-base-lib antioch-gfx-sdl2-lib)
 endif()
+
+add_subdirectory(tests)

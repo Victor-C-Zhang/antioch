@@ -75,7 +75,6 @@ Result implDestroyDevice(Device_t* baseDevice, const AllocationCallback* pAlloca
 
 Result implSubmit(Device_t* baseDevice, [[maybe_unused]] uint32_t submitCount,
                   [[maybe_unused]] const SubmitInfo* pSubmits) {
-  // TODO: something that isn't a toy example
   SDL2Device_t* device = static_cast<SDL2Device_t*>(baseDevice);
 
   SDL_SetRenderDrawColor(device->renderer, 0x00, 0x00, 0x00, 0xFF);
