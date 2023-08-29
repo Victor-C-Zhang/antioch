@@ -26,12 +26,13 @@ Result implDestroyDevice(Device_t* device, const AllocationCallback* pAllocator)
 }
 
 Result implSubmit(Device_t* device, uint32_t, const SubmitInfo*) {
+  gTestData.numFramesSubmitted++;
+
   for (uint32_t i = 0; i < SCREEN_HEIGHT; i++) {
     for (uint32_t j = 0; j < SCREEN_WIDTH; j++) {
       for (uint32_t k = 0; k < NUM_CHANNELS; k++) {
         uint8_t val = device->screen[i * SCREEN_WIDTH * NUM_CHANNELS + j * NUM_CHANNELS + k];
         gTestData.framesSubmitted.push_back(val);
-        gTestData.numFramesSubmitted++;
       }
     }
   }

@@ -10,10 +10,16 @@ target_include_directories(antioch-gfx-test-backend
   PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../include
 )
 
-add_library(antioch-gfx-test ${IMPL_TEST_SRCS})
-add_dependencies(antioch-gfx-test antioch-gfx-base-lib antioch-gfx-test-backend)
+add_library(antioch-gfx-test-lib INTERFACE)
+add_dependencies(antioch-gfx-test-lib antioch-gfx-base-lib antioch-gfx-test-backend)
+target_link_libraries(antioch-gfx-test-lib INTERFACE antioch-gfx-base-lib antioch-gfx-test-backend)
+
+add_executable(antioch-gfx-test ${IMPL_TEST_SRCS})
+add_dependencies(antioch-gfx-test antioch-gfx-test-lib)
 target_link_libraries(antioch-gfx-test 
-  PRIVATE antioch-gfx-test-backend
-  PRIVATE antioch-gfx-base-lib
+  PRIVATE antioch-gfx-test-lib
   PUBLIC GTest::gtest_main
 )
+
+include(GoogleTest)
+gtest_discover_tests(antioch-gfx-test)

@@ -194,6 +194,7 @@ target_link_libraries(antioch-base-test PUBLIC
   GTest::gtest_main
 )
 include(GoogleTest)
+gtest_discover_tests(antioch-base-test)
 
 ###############################################################
 ########################## Utilities ##########################
