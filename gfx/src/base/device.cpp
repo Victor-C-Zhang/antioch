@@ -51,6 +51,31 @@ GFX_API Result Device::mapMemory(const DeviceMemory& memory, void** ppData) {
   return Result::eSuccess;
 }
 
+GFX_API Result Device::createRenderTarget(const RenderTargetCreateInfo& createInfo,
+                                          const AllocationCallback* pAllocator,
+                                          RenderTarget* pRenderTarget) {
+  if (createInfo.extents.x == 0 || createInfo.extents.y == 0) {
+    return Result::eInvalidParameter;
+  }
+
+  RenderTarget renderTarget = antioch::gfx::common::allocate<RenderTarget_t>(pAllocator);
+
+  if (!renderTarget) {
+    return Result::eOutOfMemory;
+  }
+
+  renderTarget->createInfo = createInfo;
+  renderTarget->screen = reinterpret_cast<uint8_t*>(antioch::gfx::common::allocate(
+      pAllocator, createInfo.extents.x * createInfo.extents.y * createInfo.numChannels));
+
+  if (!renderTarget->screen) {
+    antioch::gfx::common::deallocate<RenderTarget_t>(pAllocator, renderTarget);
+  }
+
+  *pRenderTarget = renderTarget;
+  return Result::eSuccess;
+}
+
 GFX_API Result Device::createBuffer(const BufferCreateInfo& createInfo,
                                     const AllocationCallback* pAllocator, Buffer* pBuffer) {
   Buffer buffer = antioch::gfx::common::allocate<Buffer_t>(pAllocator);
@@ -132,17 +157,22 @@ GFX_API Result Device::bindBuffer(const DeviceMemory& memory, Buffer& buffer, si
 }
 
 GFX_API Result Device::submit(uint32_t submitCount, const SubmitInfo* pSubmits) {
-  for (uint32_t i = 0; i < SCREEN_WIDTH * SCREEN_HEIGHT * NUM_CHANNELS; i++) {
-    device->screen[i] = 0;
-  }
+  for (uint32_t n = 0; n < submitCount; ++n) {
+    RenderTarget renderTarget = pSubmits[n].renderTarget;
+    uint32_t width = renderTarget->createInfo.extents.x;
+    uint32_t height = renderTarget->createInfo.extents.y;
+    uint32_t numChannels = renderTarget->createInfo.numChannels;
 
-  for (uint32_t i = 0; i < submitCount; ++i) {
-    for (uint32_t j = 0; j < pSubmits[i].commandBufferCount; ++j) {
-      CommandBuffer_t* commandBuffer = pSubmits[i].pCommandBuffers[j].commandBuffer;
-      for (uint32_t k = 0; k < SCREEN_WIDTH * SCREEN_HEIGHT; ++k) {
-        device->screen[k * 3] = commandBuffer->clearColour.r;
-        device->screen[k * 3 + 1] = commandBuffer->clearColour.g;
-        device->screen[k * 3 + 2] = commandBuffer->clearColour.b;
+    for (uint32_t i = 0; i < width * height * numChannels; i++) {
+      renderTarget->screen[i] = 0;
+    }
+
+    for (uint32_t i = 0; i < pSubmits[n].commandBufferCount; ++i) {
+      CommandBuffer_t* commandBuffer = pSubmits[n].pCommandBuffers[i].commandBuffer;
+      for (uint32_t j = 0; j < width * height; ++j) {
+        renderTarget->screen[j * 3] = commandBuffer->clearColour.r;
+        renderTarget->screen[j * 3 + 1] = commandBuffer->clearColour.g;
+        renderTarget->screen[j * 3 + 2] = commandBuffer->clearColour.b;
       }
 
       const CommandBuffer_t::State& state = commandBuffer->state;
@@ -156,10 +186,10 @@ GFX_API Result Device::submit(uint32_t submitCount, const SubmitInfo* pSubmits) 
           uint8_t* pData = static_cast<uint8_t*>(glyph->createInfo.buffer->memory->data);
           for (uint32_t x = 0; x < glyph->createInfo.extent.x; ++x) {
             for (uint32_t y = 0; y < glyph->createInfo.extent.y; ++y) {
-              if (x + offset.x >= SCREEN_WIDTH || y + offset.y >= SCREEN_HEIGHT) {
+              if (x + offset.x >= width || y + offset.y >= height) {
                 continue;
               }
-              uint32_t screenIdx = ((y + offset.y) * SCREEN_WIDTH + x + offset.x) * NUM_CHANNELS;
+              uint32_t screenIdx = ((y + offset.y) * width + x + offset.x) * numChannels;
 
               uint32_t memoryIdx =
                   glyph->createInfo.buffer->memoryOffset + glyph->createInfo.bufferOffset;
@@ -174,9 +204,9 @@ GFX_API Result Device::submit(uint32_t submitCount, const SubmitInfo* pSubmits) 
               }
 
               if ((1 << dataBit) & pData[memoryIdx]) {
-                device->screen[screenIdx] = brush->createInfo.brushColour.r;
-                device->screen[screenIdx + 1] = brush->createInfo.brushColour.g;
-                device->screen[screenIdx + 2] = brush->createInfo.brushColour.b;
+                renderTarget->screen[screenIdx] = brush->createInfo.brushColour.r;
+                renderTarget->screen[screenIdx + 1] = brush->createInfo.brushColour.g;
+                renderTarget->screen[screenIdx + 2] = brush->createInfo.brushColour.b;
               }
             }
           }

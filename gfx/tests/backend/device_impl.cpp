@@ -25,17 +25,26 @@ Result implDestroyDevice(Device_t* device, const AllocationCallback* pAllocator)
   return Result::eSuccess;
 }
 
-Result implSubmit(Device_t* device, uint32_t, const SubmitInfo*) {
+Result implSubmit(Device_t*, uint32_t submitCount, const SubmitInfo* pSubmits) {
   gTestData.numFramesSubmitted++;
 
-  for (uint32_t i = 0; i < SCREEN_HEIGHT; i++) {
-    for (uint32_t j = 0; j < SCREEN_WIDTH; j++) {
-      for (uint32_t k = 0; k < NUM_CHANNELS; k++) {
-        uint8_t val = device->screen[i * SCREEN_WIDTH * NUM_CHANNELS + j * NUM_CHANNELS + k];
-        gTestData.framesSubmitted.push_back(val);
+  std::vector<uint8_t> frame;
+
+  for (uint32_t n = 0; n < submitCount; n++) {
+    RenderTarget renderTarget = pSubmits[n].renderTarget;
+    for (uint32_t i = 0; i < renderTarget->createInfo.extents.y; i++) {
+      for (uint32_t j = 0; j < renderTarget->createInfo.extents.x; j++) {
+        for (uint32_t k = 0; k < renderTarget->createInfo.numChannels; k++) {
+          uint8_t val = renderTarget->screen[i * renderTarget->createInfo.extents.x *
+                                                 renderTarget->createInfo.numChannels +
+                                             j * renderTarget->createInfo.numChannels + k];
+          frame.push_back(val);
+        }
       }
     }
   }
+  gTestData.framesSubmitted.push_back(frame);
+
   return Result::eSuccess;
 }
 

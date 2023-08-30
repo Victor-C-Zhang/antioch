@@ -14,8 +14,6 @@ struct Instance_t {
 
 struct Device_t {
   DeviceCreateInfo createInfo;
-
-  uint8_t screen[SCREEN_WIDTH * SCREEN_HEIGHT * NUM_CHANNELS];
 };
 
 struct CommandBuffer_t {
@@ -47,6 +45,11 @@ struct CommandBuffer_t {
 struct DeviceMemory_t {
   MemoryAllocateInfo allocInfo;
   void* data;
+};
+
+struct RenderTarget_t {
+  RenderTargetCreateInfo createInfo;
+  uint8_t* screen;
 };
 
 struct Buffer_t {

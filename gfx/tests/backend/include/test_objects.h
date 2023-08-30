@@ -11,7 +11,7 @@
 namespace antioch::gfx {
 
 struct TestData {
-  std::vector<uint8_t> framesSubmitted;
+  std::vector<std::vector<uint8_t>> framesSubmitted;
   uint32_t numFramesSubmitted;
 };
 

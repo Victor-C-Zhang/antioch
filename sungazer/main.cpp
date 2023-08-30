@@ -6,6 +6,7 @@
 
 #include <cassert>
 #include <chrono>
+#include <iostream>
 #include <string>
 
 using namespace antioch::gfx;
@@ -22,6 +23,12 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
   DeviceCreateInfo deviceInfo{};
   Device device;
   CHECK_ERROR(instance.createDevice(deviceInfo, nullptr, &device));
+
+  RenderTargetCreateInfo renderTargetInfo{};
+  renderTargetInfo.extents = {.x = SCREEN_WIDTH, .y = SCREEN_HEIGHT};
+  renderTargetInfo.numChannels = 3;
+  RenderTarget renderTarget;
+  CHECK_ERROR(device.createRenderTarget(renderTargetInfo, nullptr, &renderTarget));
 
   CommandBufferCreateInfo cmdBufInfo{};
   CommandBuffer cmdBuf[2];
@@ -86,10 +93,17 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
 
   CHECK_ERROR(cmdBuf[0].end());
 
-  SubmitInfo submitInfo[2] = {SubmitInfo{.commandBufferCount = 1, .pCommandBuffers = &cmdBuf[0]},
-                              SubmitInfo{.commandBufferCount = 1, .pCommandBuffers = &cmdBuf[1]}};
+  std::cout << "End command buffer recording" << std::endl;
+
+  SubmitInfo submitInfo[2] = {
+      SubmitInfo{
+          .renderTarget = renderTarget, .commandBufferCount = 1, .pCommandBuffers = &cmdBuf[0]},
+      SubmitInfo{
+          .renderTarget = renderTarget, .commandBufferCount = 1, .pCommandBuffers = &cmdBuf[1]}};
 
   CHECK_ERROR(device.submit(1, submitInfo));
+
+  std::cout << "End submission" << std::endl;
 
   bool quit = false;
 

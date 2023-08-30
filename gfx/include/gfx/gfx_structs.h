@@ -52,6 +52,11 @@ struct MemoryAllocateInfo {
   size_t allocationSize;
 };
 
+struct RenderTargetCreateInfo {
+  Vector2D extents;
+  uint32_t numChannels;
+};
+
 struct BufferCreateInfo {
   size_t size;
 };
@@ -79,6 +84,7 @@ struct CommandBufferBeginInfo {
 };
 
 struct SubmitInfo {
+  RenderTarget renderTarget;
   uint32_t commandBufferCount;
   const CommandBuffer* pCommandBuffers;
 };

@@ -20,7 +20,7 @@ constexpr uint32_t SCREEN_HEIGHT_CELLS = SCREEN_HEIGHT;
 constexpr uint32_t PIXEL_SCREEN_WIDTH = CELL_WIDTH * SCREEN_WIDTH_CELLS;
 constexpr uint32_t PIXEL_SCREEN_HEIGHT = CELL_HEIGHT * SCREEN_HEIGHT_CELLS;
 
-void drawCircle(SDL_Renderer* renderer, int x, int y, int radius) {
+[[maybe_unused]] void drawCircle(SDL_Renderer* renderer, int x, int y, int radius) {
   for (int w = 0; w < radius * 2; w++) {
     for (int h = 0; h < radius * 2; h++) {
       int dx = radius - w;  // horizontal offset
@@ -73,8 +73,7 @@ Result implDestroyDevice(Device_t* baseDevice, const AllocationCallback* pAlloca
   return Result::eSuccess;
 }
 
-Result implSubmit(Device_t* baseDevice, [[maybe_unused]] uint32_t submitCount,
-                  [[maybe_unused]] const SubmitInfo* pSubmits) {
+Result implSubmit(Device_t* baseDevice, uint32_t submitCount, const SubmitInfo* pSubmits) {
   SDL2Device_t* device = static_cast<SDL2Device_t*>(baseDevice);
 
   SDL_SetRenderDrawColor(device->renderer, 0x00, 0x00, 0x00, 0xFF);
@@ -88,16 +87,19 @@ Result implSubmit(Device_t* baseDevice, [[maybe_unused]] uint32_t submitCount,
     }
   }
 
-  for (uint32_t i = 0; i < SCREEN_WIDTH_CELLS; i++) {
-    for (uint32_t j = 0; j < SCREEN_HEIGHT_CELLS; j++) {
-      uint8_t r = device->screen[j * SCREEN_WIDTH_CELLS * 3 + i * 3];
-      uint8_t g = device->screen[j * SCREEN_WIDTH_CELLS * 3 + i * 3 + 1];
-      uint8_t b = device->screen[j * SCREEN_WIDTH_CELLS * 3 + i * 3 + 2];
-      if (r + g + b > 0) {
-        SDL_SetRenderDrawColor(device->renderer, r, g, b, 0xFF);
-        SDL_FRect rect = {(float)i * CELL_WIDTH + 4, (float)j * CELL_HEIGHT + 4, CELL_WIDTH - 8,
-                          CELL_HEIGHT - 8};
-        SDL_RenderFillRectF(device->renderer, &rect);
+  for (uint32_t n = 0; n < submitCount; n++) {
+    RenderTarget renderTarget = pSubmits[n].renderTarget;
+    for (uint32_t i = 0; i < SCREEN_WIDTH_CELLS; i++) {
+      for (uint32_t j = 0; j < SCREEN_HEIGHT_CELLS; j++) {
+        uint8_t r = renderTarget->screen[j * SCREEN_WIDTH_CELLS * 3 + i * 3];
+        uint8_t g = renderTarget->screen[j * SCREEN_WIDTH_CELLS * 3 + i * 3 + 1];
+        uint8_t b = renderTarget->screen[j * SCREEN_WIDTH_CELLS * 3 + i * 3 + 2];
+        if (r + g + b > 0) {
+          SDL_SetRenderDrawColor(device->renderer, r, g, b, 0xFF);
+          SDL_FRect rect = {(float)i * CELL_WIDTH + 4, (float)j * CELL_HEIGHT + 4, CELL_WIDTH - 8,
+                            CELL_HEIGHT - 8};
+          SDL_RenderFillRectF(device->renderer, &rect);
+        }
       }
     }
   }

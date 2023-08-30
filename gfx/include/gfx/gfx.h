@@ -43,6 +43,9 @@ class Device {
   GFX_API Result createCommandBuffer(const CommandBufferCreateInfo& createInfo,
                                      const AllocationCallback* pAllocator,
                                      CommandBuffer* pCommandBuffer);
+  GFX_API Result createRenderTarget(const RenderTargetCreateInfo& createInfo,
+                                    const AllocationCallback* pAllocator,
+                                    RenderTarget* pRenderTarget);
   GFX_API Result createBuffer(const BufferCreateInfo& createInfo,
                               const AllocationCallback* pAllocator, Buffer* pBuffer);
   GFX_API Result createImage(const ImageCreateInfo& createInfo,
