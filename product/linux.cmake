@@ -23,14 +23,14 @@ FetchContent_GetProperties(protobuf SOURCE_DIR Protobuf_SOURCE_DIR)
 # Include the script which defines 'protobuf_generate'
 include(${Protobuf_SOURCE_DIR}/cmake/protobuf-generate.cmake)
 # For generated sources
-file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/generated")
+file(MAKE_DIRECTORY "${PROJECT_SOURCE_DIR}/proto/generated")
 
 add_library(proto-objs OBJECT proto/gtfs-realtime.proto)
 target_link_libraries(proto-objs PUBLIC protobuf::libprotobuf)
-set(PROTO_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/generated")
+set(PROTO_BINARY_DIR "${PROJECT_SOURCE_DIR}/proto/generated")
 target_include_directories(proto-objs PUBLIC "$<BUILD_INTERFACE:${PROTO_BINARY_DIR}>")
 protobuf_generate(
     TARGET proto-objs
-    IMPORT_DIRS "${CMAKE_CURRENT_LIST_DIR}/../proto"
+    IMPORT_DIRS "${PROJECT_SOURCE_DIR}/proto"
     PROTOC_OUT_DIR "${PROTO_BINARY_DIR}"
 )
