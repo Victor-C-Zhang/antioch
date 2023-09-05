@@ -2,6 +2,8 @@
 
 #include "bart_converter.h"
 
+#include <latch.h>
+#include <transfer.h>
 #include <gtfs-realtime.pb.h>
 
 #include <chrono>
@@ -27,6 +29,7 @@ void BartConverter::startTracking(const Station& station) {
     stations.emplace_back((StationIdentifier)station.id());
     refresh_cache(std::chrono::system_clock::now());
   }
+  std::cout << "Done start tracking" << std::endl;
 }
 
 void BartConverter::stopTracking(const Station& station) {
@@ -88,7 +91,6 @@ std::vector<StationArrivals> BartConverter::convert(const std::string& data) {
   }
 
   {
-    std::scoped_lock<std::mutex> l(stations_mtx);
     std::vector<StationArrivals> trains;
     for (size_t i = 0; i < stations.size(); ++i) {
       std::vector<TrainArrival> arrival_vec;
@@ -116,12 +118,23 @@ void BartConverter::update_last_fetch(const std::chrono::time_point<std::chrono:
 }
 
 void BartConverter::refresh_cache(const std::chrono::time_point<std::chrono::system_clock>& now) {
-  update_last_fetch(now);
+  std::string fetched;
+  antioch::connectivity::curl_transfer::Latch latch(1);
 
-  // TODO fetch from wifi
-  std::string e;
-  auto converted = convert(e);
+  auto cb = [&](std::string s) {
+    std::cout << "called cb" << std::endl;
+    fetched.swap(s);
+    latch.count_down();
+  };
+  antioch::connectivity::curl_transfer::start_transfer("api.bart.gov/gtfsrt/tripupdate.aspx", true,
+                                                       cb);
+  if (!latch.wait_or_timeout(std::chrono::seconds(15))) {
+    std::cerr << "Timed out waiting for BART API fetch!" << std::endl;
+    return;
+  }
+  auto converted = convert(fetched);
   cache.swap(converted);
+  update_last_fetch(now);
 }
 
 TrainDescription BartConverter::line_of(const TripUpdate& tu) {
@@ -198,6 +211,11 @@ TrainDescription BartConverter::line_of(const TripUpdate& tu) {
 
   // Antioch extension is impossible to tell. Let's just hope it's an Antioch-bound bus
   if (second_to_last_stop.stop_id() == StationIdentifier_Name(PCTR) &&
+      second_to_last_stop.stop_sequence() == 1) {
+    return {ANTC, BartLine::YELLOW};
+  }
+
+  if (second_to_last_stop.stop_id() == StationIdentifier_Name(ANTC) &&
       second_to_last_stop.stop_sequence() == 1) {
     return {ANTC, BartLine::YELLOW};
   }

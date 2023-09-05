@@ -5,13 +5,13 @@
 #include <iostream>
 #include <thread>
 
+#include <bart_converter.h>
 #include "antioch/base/config/configerator.h"
 #include "antioch/base/constants.h"
 
 namespace antioch::base {
 
-static int e = 1;
-
+static antioch::bart::BartStation civic_center{antioch::bart::StationIdentifier::CIVC};
 EventLoop::EventLoop() : boot_time(std::chrono::system_clock::now()) {
   tick = boot_time;
   try {
@@ -24,6 +24,7 @@ EventLoop::EventLoop() : boot_time(std::chrono::system_clock::now()) {
 }
 
 void EventLoop::run() {
+  init_from_config(config.get());
   try {
     Configerator::write_or_exception(*config);
   } catch (const std::exception& e) {
@@ -47,14 +48,16 @@ void EventLoop::run() {
   }
 }
 
+void EventLoop::init_from_config(const antioch::base::Config*) {
+  converter = new antioch::bart::BartConverter();
+  converter->startTracking(civic_center);
+}
+
 int EventLoop::run_tick() {
-  auto time = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-  std::cout << "Tick: " << std::ctime(&time) << std::endl;
-  if (e % 10 == 0) {
-    std::this_thread::sleep_for(std::chrono::milliseconds(5000));
-  }
-  ++e;
-  return e;
+  std::cout << "Run tick" <<std::endl;
+  std::cout << converter->get(civic_center) << std::endl;
+  std::cout << "Done run tick" <<std::endl;
+  return 0;
 }
 
 }  // namespace antioch::base

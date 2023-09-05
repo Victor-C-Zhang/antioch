@@ -94,6 +94,7 @@ protobuf_generate(
 
 # Non-blocking curl
 add_library(curl-transfer
+  connectivity/curl/src/latch.cpp
   connectivity/curl/src/multi_performer.cpp
   connectivity/curl/src/transfer.cpp
 )
@@ -105,14 +106,6 @@ add_library(transit-base INTERFACE)
 target_include_directories(transit-base INTERFACE transit_base/include)
 target_link_libraries(transit-base INTERFACE nlohmann_json::nlohmann_json)
 
-# Event loop and core code
-add_library(antioch-base
-  base/src/config/configerator.cpp
-  base/src/config/config.cpp
-  base/src/event_loop.cpp
-)
-target_include_directories(antioch-base PUBLIC base/include/)
-target_link_libraries(antioch-base PRIVATE transit-base nlohmann_json::nlohmann_json)
 # SF Muni
 add_library(sfmuni
   sfmuni/src/converter.cpp
@@ -127,8 +120,17 @@ add_library(bart
   bart/src/station_arrivals.cpp
   bart/src/station_identifier.cpp
 )
-target_include_directories(bart PRIVATE bart/include)
+target_include_directories(bart PUBLIC bart/include)
 target_link_libraries(bart PUBLIC transit-base curl-transfer proto-objs)
+
+# Event loop and core code
+add_library(antioch-base
+  base/src/config/configerator.cpp
+  base/src/config/config.cpp
+  base/src/event_loop.cpp
+)
+target_include_directories(antioch-base PUBLIC base/include/)
+target_link_libraries(antioch-base PRIVATE transit-base bart nlohmann_json::nlohmann_json)
 
 # main exe
 add_executable(antioch
