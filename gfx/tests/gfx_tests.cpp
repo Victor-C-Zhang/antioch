@@ -1,8 +1,6 @@
 #include <gfx/gfx.h>
 #include <gtest/gtest.h>
 
-#include <span>
-
 #include "test_objects.h"
 
 using namespace antioch::gfx;
