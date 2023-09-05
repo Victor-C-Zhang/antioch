@@ -91,7 +91,6 @@ std::vector<StationArrivals> BartConverter::convert(const std::string& data) {
   }
 
   {
-    // std::scoped_lock<std::mutex> l(stations_mtx);
     std::vector<StationArrivals> trains;
     for (size_t i = 0; i < stations.size(); ++i) {
       std::vector<TrainArrival> arrival_vec;
