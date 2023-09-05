@@ -14,7 +14,7 @@ target_include_directories(antioch-gfx-base-lib
 )
 
 # Simulator backend
-if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.22 AND CMAKE_BUILD_TYPE STREQUAL "Debug")
+if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.22 AND CMAKE_BUILD_TYPE STREQUAL "Debug" AND GFX_DEBUG)
 
   find_package(SDL2 REQUIRED CONFIG REQUIRED COMPONENTS SDL2)
   
@@ -33,4 +33,6 @@ if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.22 AND CMAKE_BUILD_TYPE STREQUAL "Debug
   target_link_libraries(antioch-gfx-sdl2 INTERFACE antioch-gfx-base-lib antioch-gfx-sdl2-lib)
 endif()
 
-add_subdirectory(tests)
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+  add_subdirectory(tests)
+endif()

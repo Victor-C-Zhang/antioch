@@ -27,66 +27,20 @@ endif()
 
 add_compile_options(-fno-rtti)
 
-enable_testing()
-FetchContent_Declare(
-  googletest
-  GIT_REPOSITORY https://github.com/google/googletest.git
-  GIT_TAG        release-1.11.0
-)
-# For Windows: Prevent overriding the parent project's compiler/linker settings
-if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-  set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-endif()
-FetchContent_MakeAvailable(googletest)
-
 #add_compile_options(-fsanitize=address)
 #add_link_options(-fsanitize=address)
 
-add_subdirectory(gfx)
-
-set(BUILD_TESTING OFF) # to disable abseil test
-set(ABSL_ENABLE_INSTALL ON) # now you can enable install rules even in subproject... 
-set(ABSL_PROPAGATE_CXX_STD ON)  # To avoid CMake warning
-
-FetchContent_Declare(
-  absl
-  GIT_REPOSITORY https://github.com/abseil/abseil-cpp.git
-  GIT_TAG 20230125.3
-)
-FetchContent_MakeAvailable(absl)
-
-FetchContent_Declare(json
-  URL https://github.com/nlohmann/json/releases/download/v3.11.2/json.tar.xz
-)
-
-# For Windows: Prevent overriding the parent project's compiler/linker settings
-if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
-  set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+# TODO: switch dependencies based on product
+include(product/common.cmake)
+if(PRODUCT STREQUAL "LINUX")
+  include(product/linux.cmake)
+elseif(PRODUCT STREQUAL "RPI3")
+  include(product/rpi3.cmake)
+else()
+  message(FATAL_ERROR "${PRODUCT} PRODUCT variable not supported. Aborting.")
 endif()
 
-FetchContent_MakeAvailable(json)
-
-set(protobuf_BUILD_TESTS OFF)
-FetchContent_Declare(protobuf 
-  URL https://github.com/protocolbuffers/protobuf/releases/download/v23.4/protobuf-23.4.tar.gz
-)
-FetchContent_MakeAvailable(protobuf)
-# Get source directory of the Protobuf
-FetchContent_GetProperties(protobuf SOURCE_DIR Protobuf_SOURCE_DIR)
-# Include the script which defines 'protobuf_generate'
-include(${Protobuf_SOURCE_DIR}/cmake/protobuf-generate.cmake)
-# For generated sources
-file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/generated")
-
-add_library(proto-objs OBJECT proto/gtfs-realtime.proto)
-target_link_libraries(proto-objs PUBLIC protobuf::libprotobuf)
-set(PROTO_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/generated")
-target_include_directories(proto-objs PUBLIC "$<BUILD_INTERFACE:${PROTO_BINARY_DIR}>")
-protobuf_generate(
-    TARGET proto-objs
-    IMPORT_DIRS "${CMAKE_CURRENT_LIST_DIR}/proto"
-    PROTOC_OUT_DIR "${PROTO_BINARY_DIR}"
-)
+add_subdirectory(gfx)
 
 ###############################################################
 ########################## Libraries ##########################
@@ -148,77 +102,79 @@ target_link_libraries(antioch PUBLIC
   nlohmann_json::nlohmann_json
 )
 
+
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
 ###############################################################
 ############################ Tests ############################
 ###############################################################
+  add_executable(curl-transfer-test
+    connectivity/curl/test/e2e.cpp
+    # connectivity/curl/test/test_runner.cpp
+    base/test/test_runner.cpp
 
-add_executable(curl-transfer-test
-  connectivity/curl/test/e2e.cpp
-  # connectivity/curl/test/test_runner.cpp
-  base/test/test_runner.cpp
+  )
+  add_dependencies(curl-transfer-test curl-transfer)
+  target_include_directories(curl-transfer-test PUBLIC
+    connectivity/curl/include
+  )
+  target_link_libraries(curl-transfer-test PUBLIC
+    curl-transfer
+    GTest::gtest_main
+    GTest::gmock_main
+  )
 
-)
-add_dependencies(curl-transfer-test curl-transfer)
-target_include_directories(curl-transfer-test PUBLIC
-  connectivity/curl/include
-)
-target_link_libraries(curl-transfer-test PUBLIC
-  curl-transfer
-  GTest::gtest_main
-  GTest::gmock_main
-)
+  add_executable(bart-test
+    bart/test/test_runner.cpp
+    bart/test/e2e.cpp
+  )
+  add_dependencies(bart-test bart)
+  target_include_directories(bart-test PUBLIC
+    bart/include
+  )
+  target_link_libraries(bart-test PUBLIC
+    bart
+    curl-transfer
+    GTest::gtest_main
+  )
 
-add_executable(bart-test
-  bart/test/test_runner.cpp
-  bart/test/e2e.cpp
-)
-add_dependencies(bart-test bart)
-target_include_directories(bart-test PUBLIC
-  bart/include
-)
-target_link_libraries(bart-test PUBLIC
-  bart
-  curl-transfer
-  GTest::gtest_main
-)
-
-add_executable(antioch-base-test
-  base/test/trivial_test.cpp
-  base/test/test_runner.cpp
-)
-add_dependencies(antioch-base-test antioch-base)
-target_include_directories(antioch-base-test PUBLIC
-  base/include
-  base/test/include
-)
-target_link_libraries(antioch-base-test PUBLIC
-  antioch-base
-  GTest::gtest_main
-)
-include(GoogleTest)
-gtest_discover_tests(antioch-base-test)
+  add_executable(antioch-base-test
+    base/test/trivial_test.cpp
+    base/test/test_runner.cpp
+  )
+  add_dependencies(antioch-base-test antioch-base)
+  target_include_directories(antioch-base-test PUBLIC
+    base/include
+    base/test/include
+  )
+  target_link_libraries(antioch-base-test PUBLIC
+    antioch-base
+    GTest::gtest_main
+  )
+  include(GoogleTest)
+  gtest_discover_tests(antioch-base-test)
 
 ###############################################################
 ########################## Utilities ##########################
 ###############################################################
 
-add_executable(moonlight-vigil
-  moonlight_vigil/main.cpp
-)
-
-if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.22 AND CMAKE_BUILD_TYPE STREQUAL "Debug")
-  find_package(SDL2 REQUIRED CONFIG REQUIRED COMPONENTS SDL2)
-  find_package(SDL2 REQUIRED CONFIG COMPONENTS SDL2main)
-
-  add_executable(sungazer
-    sungazer/main.cpp
+  add_executable(moonlight-vigil
+    moonlight_vigil/main.cpp
   )
-  add_dependencies(sungazer antioch-gfx-sdl2)
-  target_link_libraries(sungazer PRIVATE antioch-gfx-sdl2)
 
-  if(TARGET SDL2::SDL2main)
-      target_link_libraries(sungazer PRIVATE SDL2::SDL2main)
+  if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.22 AND GFX_DEBUG)
+    find_package(SDL2 REQUIRED CONFIG REQUIRED COMPONENTS SDL2)
+    find_package(SDL2 REQUIRED CONFIG COMPONENTS SDL2main)
+
+    add_executable(sungazer
+      sungazer/main.cpp
+    )
+    add_dependencies(sungazer antioch-gfx-sdl2)
+    target_link_libraries(sungazer PRIVATE antioch-gfx-sdl2)
+
+    if(TARGET SDL2::SDL2main)
+        target_link_libraries(sungazer PRIVATE SDL2::SDL2main)
+    endif()
+
+    target_link_libraries(sungazer PRIVATE SDL2::SDL2)
   endif()
-
-  target_link_libraries(sungazer PRIVATE SDL2::SDL2)
 endif()
