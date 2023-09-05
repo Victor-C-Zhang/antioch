@@ -34,3 +34,6 @@ protobuf_generate(
     IMPORT_DIRS "${PROJECT_SOURCE_DIR}/proto"
     PROTOC_OUT_DIR "${PROTO_BINARY_DIR}"
 )
+
+######## HALs ########
+include(${PROJECT_SOURCE_DIR}/device/linux/wifi/wifi.cmake)
