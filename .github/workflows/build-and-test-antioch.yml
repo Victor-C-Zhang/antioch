@@ -85,6 +85,8 @@ jobs:
               -S .
               -B build
               -D CMAKE_BUILD_TYPE=${{ matrix.config.build_type }}
+              -D PRODUCT=LINUX
+              -D GFX_DEBUG=1
               -D CMAKE_C_COMPILER_LAUNCHER=ccache
               -D CMAKE_CXX_COMPILER_LAUNCHER=ccache
               -G Ninja
