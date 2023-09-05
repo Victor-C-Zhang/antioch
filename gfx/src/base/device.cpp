@@ -2,6 +2,8 @@
 
 #include <gfx/gfx.h>
 
+#include <cstdio>
+
 #include "base/function_impl.h"
 #include "base/object_base.h"
 #include "common/allocation.h"
@@ -40,6 +42,11 @@ GFX_API Result Device::allocateMemory(const MemoryAllocateInfo& allocInfo,
   deviceMemory->allocInfo = allocInfo;
   deviceMemory->data = antioch::gfx::common::allocate(pAllocator, allocInfo.allocationSize);
 
+  if (!deviceMemory->data) {
+    antioch::gfx::common::deallocate<DeviceMemory_t>(pAllocator, deviceMemory);
+    return Result::eOutOfMemory;
+  }
+
   *pDeviceMemory = deviceMemory;
 
   return Result::eSuccess;
@@ -70,6 +77,7 @@ GFX_API Result Device::createRenderTarget(const RenderTargetCreateInfo& createIn
 
   if (!renderTarget->screen) {
     antioch::gfx::common::deallocate<RenderTarget_t>(pAllocator, renderTarget);
+    return Result::eOutOfMemory;
   }
 
   *pRenderTarget = renderTarget;
@@ -176,25 +184,22 @@ GFX_API Result Device::submit(uint32_t submitCount, const SubmitInfo* pSubmits) 
       }
 
       const CommandBuffer_t::State& state = commandBuffer->state;
-      for (uint32_t drawIdx = 0; drawIdx < state.numDraws; ++drawIdx) {
+      for (size_t drawIdx = 0; drawIdx < state.numDraws; ++drawIdx) {
         Brush brush = state.drawData[drawIdx].brush;
         Vector2D offset = state.drawData[drawIdx].origin;
-        for (uint32_t primIdx = 0; primIdx < state.drawData[drawIdx].numPrims; ++primIdx) {
+        for (size_t primIdx = 0; primIdx < state.drawData[drawIdx].numPrims; ++primIdx) {
           offset += state.drawData[drawIdx].prims[primIdx].offset;
           Glyph glyph = state.drawData[drawIdx].prims[primIdx].glyph;
-
           uint8_t* pData = static_cast<uint8_t*>(glyph->createInfo.buffer->memory->data);
           for (uint32_t x = 0; x < glyph->createInfo.extent.x; ++x) {
             for (uint32_t y = 0; y < glyph->createInfo.extent.y; ++y) {
               if (x + offset.x >= width || y + offset.y >= height) {
                 continue;
               }
-              uint32_t screenIdx = ((y + offset.y) * width + x + offset.x) * numChannels;
-
-              uint32_t memoryIdx =
+              size_t screenIdx = ((y + offset.y) * width + x + offset.x) * numChannels;
+              size_t memoryIdx =
                   glyph->createInfo.buffer->memoryOffset + glyph->createInfo.bufferOffset;
               uint32_t dataBit = 0;
-
               if (glyph->createInfo.isColMajor) {
                 memoryIdx += x * glyph->createInfo.strideBytes;
                 dataBit += y;
@@ -202,7 +207,6 @@ GFX_API Result Device::submit(uint32_t submitCount, const SubmitInfo* pSubmits) 
                 memoryIdx += y * glyph->createInfo.strideBytes;
                 dataBit += glyph->createInfo.extent.x - 1 - x;
               }
-
               if ((1 << dataBit) & pData[memoryIdx]) {
                 renderTarget->screen[screenIdx] = brush->createInfo.brushColour.r;
                 renderTarget->screen[screenIdx + 1] = brush->createInfo.brushColour.g;
