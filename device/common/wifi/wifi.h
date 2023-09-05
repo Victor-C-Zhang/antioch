@@ -9,6 +9,7 @@ namespace hal {
 namespace wifi {
 
 enum wifi_err_t : int16_t {
+  RES_NOOP = -1,
   RES_OK = 0,
 };
 
