@@ -8,17 +8,17 @@
 namespace hal {
 namespace wifi {
 
-enum wifi_err_t : int16_t {
-  RES_NOOP = -1,
+enum wifi_err_t : uint16_t {
+  RES_NOOP = 1000,
   RES_OK = 0,
 };
 
-wifi_err_t wifi_hal_init();
+[[nodiscard]] wifi_err_t wifi_hal_init();
 wifi_err_t wifi_hal_destruct();
-wifi_err_t wifi_set_ssid(std::string ssid, std::string psk);
-wifi_err_t wifi_start_connectivity();
+[[nodiscard]] wifi_err_t wifi_set_ssid(std::string ssid, std::string psk);
+[[nodiscard]] wifi_err_t wifi_start_connectivity();
 wifi_err_t wifi_stop_connectivity();
-wifi_err_t wifi_connect();
+[[nodiscard]] wifi_err_t wifi_connect();
 wifi_err_t wifi_disconnect();
 
 bool wifi_is_disconnected();
