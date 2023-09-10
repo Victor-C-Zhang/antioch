@@ -5,6 +5,8 @@
 #include <cstdlib>
 #include <iostream>
 
+#include "antioch/base/config/configerator.h"
+
 namespace antioch::base {
 
 using antioch::connectivity::wifi::WifiService;
@@ -63,7 +65,22 @@ bool Service::late_init() {
     std::cerr << e.what() << std::endl;
     return false;
   }
-  event_loop = std::make_unique<EventLoop>();
+
+  std::unique_ptr<Config> config;
+  try {
+    config = std::move(Configerator::read_or_exception());
+  } catch (std::exception& e) {
+    std::cerr << "Using default config, exception reading saved config: " << e.what() << std::endl;
+    config = std::move(Configerator::default_config());
+  }
+  try {
+    Configerator::write_or_exception(*config);
+  } catch (const std::exception& e) {
+    std::cerr << "Exception writing config: " << e.what() << std::endl;
+  }
+
+  event_loop = std::make_unique<EventLoop>(std::move(config));
+  
   return true;
 }
 
