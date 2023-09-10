@@ -70,6 +70,7 @@ target_link_libraries(transit-base INTERFACE nlohmann_json::nlohmann_json)
 # SF Muni
 add_library(sfmuni
   sfmuni/src/converter.cpp
+  sfmuni/src/station_identifier.cpp
 )
 target_include_directories(sfmuni PUBLIC sfmuni/include transit_base/include)
 
