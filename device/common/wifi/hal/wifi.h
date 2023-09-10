@@ -21,7 +21,7 @@ wifi_err_t wifi_stop_connectivity();
 [[nodiscard]] wifi_err_t wifi_connect();
 wifi_err_t wifi_disconnect();
 
-bool wifi_is_disconnected();
+bool wifi_is_connected();
 
 }  // namespace wifi
 }  // namespace hal

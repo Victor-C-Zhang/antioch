@@ -18,10 +18,9 @@ typedef std::function<void(void)> StatusCallback;
 class WifiService {
  public:
   static std::unique_ptr<WifiService> create();
-  WifiService();
   ~WifiService();
-  bool set_ssid(std::string ssid, std::string psk);
-  void register_disconnection_cb(StatusCallback cb);
+  bool set_ssid(std::string ssid, std::string psk) noexcept;
+  void register_disconnection_cb(StatusCallback cb) noexcept;
 
   /**
    * Call this function before connect()
@@ -36,6 +35,7 @@ class WifiService {
   void connect();
 
  private:
+  WifiService();
   void status_poll_loop();
   bool shutdown = false;
   std::thread status_thr;

@@ -85,13 +85,15 @@ target_include_directories(bart PUBLIC bart/include)
 target_link_libraries(bart PUBLIC transit-base curl-transfer proto-objs)
 
 # Event loop and core code
-add_library(antioch-base
-  base/src/config/configerator.cpp
-  base/src/config/config.cpp
-  base/src/event_loop.cpp
-)
+FILE(GLOB_RECURSE antioch-base-srcs base/src/*.cpp)
+add_library(antioch-base ${antioch-base-srcs})
 target_include_directories(antioch-base PUBLIC base/include/)
-target_link_libraries(antioch-base PRIVATE transit-base bart nlohmann_json::nlohmann_json)
+target_link_libraries(antioch-base PUBLIC
+  transit-base
+  libwifi
+  bart
+  nlohmann_json::nlohmann_json
+)
 
 # main exe
 add_executable(antioch
@@ -102,11 +104,8 @@ add_dependencies(antioch
   sfmuni
   bart
 )
-target_link_libraries(antioch PUBLIC
+target_link_libraries(antioch PRIVATE
   antioch-base
-  sfmuni
-  bart
-  nlohmann_json::nlohmann_json
 )
 
 
