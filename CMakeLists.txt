@@ -30,7 +30,7 @@ add_compile_options(-fno-rtti)
 #add_compile_options(-fsanitize=address)
 #add_link_options(-fsanitize=address)
 
-# TODO: switch dependencies based on product
+# Switch dependencies and HAL impls based on product
 include(product/common.cmake)
 if(PRODUCT STREQUAL "LINUX")
   include(product/linux.cmake)
@@ -54,6 +54,13 @@ add_library(curl-transfer
 )
 target_include_directories(curl-transfer PUBLIC connectivity/curl/include)
 target_link_libraries(curl-transfer PUBLIC curl)
+
+# Wifi
+add_library(libwifi
+  connectivity/wifi/src/wifi_service.cpp
+)
+target_include_directories(libwifi PUBLIC connectivity/wifi/include)
+target_link_libraries(libwifi PUBLIC wifi-hal)
 
 # Base transit boilerplate
 add_library(transit-base INTERFACE)
