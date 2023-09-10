@@ -3,6 +3,7 @@
 #include "antioch/base/event_loop.h"
 
 #include <iostream>
+#include <map>
 #include <thread>
 
 #include <bart_converter.h>
@@ -10,6 +11,9 @@
 #include "antioch/base/constants.h"
 
 namespace antioch::base {
+
+using antioch::transit_base::Converter;
+using antioch::transit_base::TransitAgency;
 
 static antioch::bart::BartStation civic_center{antioch::bart::StationIdentifier::CIVC};
 EventLoop::EventLoop() : boot_time(std::chrono::system_clock::now()) {
@@ -49,13 +53,40 @@ void EventLoop::run() {
 }
 
 void EventLoop::init_from_config(const antioch::base::Config*) {
-  converter = new antioch::bart::BartConverter();
-  converter->startTracking(civic_center);
+  std::map<TransitAgency, Converter*> staging;
+  for (auto& station : config->stations) {
+    switch (station.agency()) {
+      case TransitAgency::BART: {
+        if (staging.find(TransitAgency::BART) == staging.end()) {
+          staging[TransitAgency::BART] = new antioch::bart::BartConverter();
+        }
+        staging[TransitAgency::BART]->startTracking(station);
+        break;
+      }
+      case TransitAgency::SF_MUNI: {
+        if (staging.find(TransitAgency::SF_MUNI) == staging.end()) {
+          // TODO muni converter
+        }
+        staging[TransitAgency::SF_MUNI]->startTracking(station);
+        break;
+      }
+      case TransitAgency::INVALID: {
+        std::cerr << "Invalid station agency" << std::endl;
+        break;
+      }
+    }
+  }
+  for (auto& [k,v] : staging) {
+    converters.push_back(v);
+  }
 }
 
 int EventLoop::run_tick() {
   std::cout << "Run tick" <<std::endl;
-  std::cout << converter->get(civic_center) << std::endl;
+  for (auto converter : converters) {
+    std::cout << "Converter:" << std::endl;
+    std::cout << converter->get(civic_center) << std::endl;
+  }
   std::cout << "Done run tick" <<std::endl;
   return 0;
 }
