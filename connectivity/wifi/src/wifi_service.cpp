@@ -5,7 +5,7 @@
 #include <stdexcept>
 #include <thread>
 
-#include <wifi.h>
+#include <hal/wifi.h>
 
 #include "antioch/connectivity/wifi/wifi_service.h"
 
@@ -13,27 +13,13 @@ namespace antioch {
 namespace connectivity {
 namespace wifi {
 
-using hal::wifi::wifi_hal_init;
-using hal::wifi::wifi_hal_destruct;
-using hal::wifi::wifi_set_ssid;
-using hal::wifi::wifi_start_connectivity;
-using hal::wifi::wifi_stop_connectivity;
-using hal::wifi::wifi_connect;
-using hal::wifi::wifi_disconnect;
+using namespace hal::wifi;
 
-using hal::wifi::wifi_is_disconnected;
-
-using hal::wifi::RES_OK;
-
-static constexpr int STATUS_POLL_RATE_MS = 100;
+static constexpr int STATUS_POLL_RATE_MS = 1000;
 
 std::unique_ptr<WifiService> WifiService::create() {
-  try {
-    return std::make_unique<WifiService>();
-  } catch (std::exception& e) {
-    std::cerr << "WifiService create failed: " << e.what() << std::endl;
-    return {nullptr};
-  }
+  auto retval = new WifiService();
+  return std::unique_ptr<WifiService>(retval);
 }
 
 WifiService::WifiService() {
@@ -46,6 +32,7 @@ WifiService::WifiService() {
 }
 
 WifiService::~WifiService() {
+  std::cout << "Shutting down wifi" << std::endl;
   shutdown = true;
   status_thr.join();
   wifi_disconnect();
@@ -53,11 +40,11 @@ WifiService::~WifiService() {
   wifi_hal_destruct();
 }
 
-bool WifiService::set_ssid(std::string ssid, std::string psk) {
-  return wifi_set_ssid(ssid, psk);
+bool WifiService::set_ssid(std::string ssid, std::string psk) noexcept {
+  return wifi_set_ssid(ssid, psk) == RES_OK;
 }
 
-void WifiService::register_disconnection_cb(StatusCallback cb) {
+void WifiService::register_disconnection_cb(StatusCallback cb) noexcept {
   callbacks.push_back(cb);
 }
 
@@ -80,7 +67,7 @@ void WifiService::connect() {
 void WifiService::status_poll_loop() {
   while (!shutdown) {
     std::this_thread::sleep_for(std::chrono::milliseconds(STATUS_POLL_RATE_MS));
-    if (wifi_is_disconnected()) {
+    if (!wifi_is_connected()) {
       for (auto cb : callbacks) {
         std::thread(cb).detach();
       }

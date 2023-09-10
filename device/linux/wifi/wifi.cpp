@@ -1,6 +1,6 @@
 // Copyright Antioch. All rights reserved.
 
-#include "wifi.h"
+#include "hal/wifi.h"
 
 namespace hal::wifi {
 
@@ -32,7 +32,7 @@ wifi_err_t wifi_disconnect() {
   return RES_OK;
 }
 
-bool wifi_is_disconnected() {
+bool wifi_is_connected() {
   return true;
 }
 
