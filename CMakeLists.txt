@@ -68,10 +68,8 @@ target_include_directories(transit-base INTERFACE transit_base/include)
 target_link_libraries(transit-base INTERFACE nlohmann_json::nlohmann_json)
 
 # SF Muni
-add_library(sfmuni
-  sfmuni/src/converter.cpp
-  sfmuni/src/station_identifier.cpp
-)
+FILE(GLOB_RECURSE sfmuni-base-srcs sfmuni/src/*.cpp)
+add_library(sfmuni ${sfmuni-base-srcs})
 target_include_directories(sfmuni PUBLIC sfmuni/include transit_base/include)
 
 # BART

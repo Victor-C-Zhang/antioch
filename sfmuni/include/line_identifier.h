@@ -6,7 +6,7 @@
 namespace antioch {
 namespace sfmuni {
 
-enum StationIdentifier : int {
+enum LineIdentifier : int {
   INVALID = 0,
   _1 = 1,     // 1
   _12 = 2,    // 12
@@ -78,9 +78,9 @@ enum StationIdentifier : int {
   _28R = 68,  // 28R
 };
 
-const std::string StationIdentifier_Name(const StationIdentifier id);
+const std::string LineIdentifier_Name(const LineIdentifier id);
 
-const std::string StationIdentifier_pretty_name(const StationIdentifier id);
+const std::string LineIdentifier_pretty_name(const LineIdentifier id);
 
 }  // namespace sfmuni
 }  // namespace antioch
