@@ -1,6 +1,6 @@
 // Copyright Antioch. All rights reserved.
 
-#include "bart_converter.h"
+#include "sfmtc/bart/bart_converter.h"
 
 #include <latch.h>
 #include <transfer.h>
@@ -9,9 +9,7 @@
 #include <chrono>
 #include <typeinfo>
 
-#include "train_description.h"
-
-namespace antioch::bart {
+namespace sfmtc::bart {
 
 using antioch::transit_base::Station;
 using antioch::transit_base::StationGetException;
@@ -59,7 +57,7 @@ std::string BartConverter::get(const Station& station) {
     }
     for (const auto& arrivals : cache) {
       if (station == arrivals.station()) {
-        return arrivals.to_string();
+        return arrivals.bart_to_string();
       }
     }
   }
@@ -96,7 +94,7 @@ std::vector<StationArrivals> BartConverter::convert(const std::string& data) {
       std::vector<TrainArrival> arrival_vec;
       for (int j = 0; j < fm.entity_size(); ++j) {
         const auto& trip_update = fm.entity(j).trip_update();
-        const TrainDescription line = line_of(trip_update);
+        const auto line = line_of(trip_update);
         for (int k = 0; k < trip_update.stop_time_update_size(); ++k) {
           const auto& stop = trip_update.stop_time_update(k);
           if (StationIdentifier_Name((StationIdentifier)(stations[i].id())) == stop.stop_id()) {
@@ -137,92 +135,96 @@ void BartConverter::refresh_cache(const std::chrono::time_point<std::chrono::sys
   update_last_fetch(now);
 }
 
-TrainDescription BartConverter::line_of(const TripUpdate& tu) {
+BartLine BartConverter::line_of(const TripUpdate& tu) {
   int n = tu.stop_time_update_size();
   auto second_to_last_stop = tu.stop_time_update(n - 1);
 
   // Green
   if (second_to_last_stop.stop_id() == StationIdentifier_Name(BALB) &&
       second_to_last_stop.stop_sequence() == 20) {
-    return {DALY, BartLine::GREEN};
+    return GreenS;
   }
   if (second_to_last_stop.stop_id() == StationIdentifier_Name(MLPT) &&
       second_to_last_stop.stop_sequence() == 20) {
-    return {BERY, BartLine::GREEN};
+    return GreenN;
   }
 
   // Orange
   if (second_to_last_stop.stop_id() == StationIdentifier_Name(MLPT) &&
       second_to_last_stop.stop_sequence() == 19) {
-    return {RICH, BartLine::ORANGE};
+    return OrangeN;
   }
   if (second_to_last_stop.stop_id() == StationIdentifier_Name(DELN) &&
       second_to_last_stop.stop_sequence() == 19) {
-    return {BERY, BartLine::ORANGE};
+    return OrangeS;
   }
 
   // Yellow
   if (second_to_last_stop.stop_id() == StationIdentifier_Name(SBRN) &&
       second_to_last_stop.stop_sequence() == 24) {
-    return {SFIA, BartLine::YELLOW};
+    return YellowS;
   }
   if (second_to_last_stop.stop_id() == StationIdentifier_Name(PITT) &&
       second_to_last_stop.stop_sequence() == 24) {
-    return {ANTC, BartLine::YELLOW};
+    return YellowN;
   }
 
   // Red
   if (second_to_last_stop.stop_id() == StationIdentifier_Name(SBRN) &&
       second_to_last_stop.stop_sequence() == 21) {
-    return {SFIA, BartLine::RED};
+    return RedS;
   }
   if (second_to_last_stop.stop_id() == StationIdentifier_Name(MLBR) &&
       second_to_last_stop.stop_sequence() == 0) {
-    return {SFIA, BartLine::RED};
+    return RedS;
   }
   if (second_to_last_stop.stop_id() == StationIdentifier_Name(DELN) &&
       second_to_last_stop.stop_sequence() == 21) {
-    return {RICH, BartLine::RED};
+    return RedN;
   }
 
   // Blue
   if (second_to_last_stop.stop_id() == StationIdentifier_Name(BALB) &&
       second_to_last_stop.stop_sequence() == 16) {
-    return {DALY, BartLine::BLUE};
+    return BlueS;
   }
   if (second_to_last_stop.stop_id() == StationIdentifier_Name(WDUB) &&
       second_to_last_stop.stop_sequence() == 16) {
-    return {DUBL, BartLine::BLUE};
+    return BlueN;
   }
 
   // Yellow PM
   if (second_to_last_stop.stop_id() == StationIdentifier_Name(SBRN) &&
       second_to_last_stop.stop_sequence() == 24) {
-    return {MLBR, BartLine::YELLOW_PM};
+    return YellowS;
   }
   if (second_to_last_stop.stop_id() == StationIdentifier_Name(SFIA) &&
       second_to_last_stop.stop_sequence() == 0) {
-    return {MLBR, BartLine::YELLOW_PM};
+    return YellowS;
   }
   if (second_to_last_stop.stop_id() == StationIdentifier_Name(PITT) &&
       second_to_last_stop.stop_sequence() == 24) {
-    return {ANTC, BartLine::YELLOW_PM};
+    return YellowN;
   }
 
   // Antioch extension is impossible to tell. Let's just hope it's an Antioch-bound bus
   if (second_to_last_stop.stop_id() == StationIdentifier_Name(PCTR) &&
       second_to_last_stop.stop_sequence() == 1) {
-    return {ANTC, BartLine::YELLOW};
+    return YellowN;
   }
 
   if (second_to_last_stop.stop_id() == StationIdentifier_Name(ANTC) &&
       second_to_last_stop.stop_sequence() == 1) {
-    return {ANTC, BartLine::YELLOW};
+    return YellowN;
   }
 
+  if (second_to_last_stop.stop_id() == StationIdentifier_Name(PITT) &&
+      second_to_last_stop.stop_sequence() == 2) {
+    return YellowS;
+  }
   std::string msg = "Unexpected line terminus combo: " + second_to_last_stop.stop_id() +
                     ", seq_num " + std::to_string((int)second_to_last_stop.stop_sequence());
   throw InvariantViolation(msg);
 }
 
-}  // namespace antioch::bart
+}  // namespace sfmtc::bart

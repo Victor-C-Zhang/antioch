@@ -8,6 +8,8 @@
 #include <map>
 #include <thread>
 
+#include <sfmtc/bart/bart_converter.h>
+#include "antioch/base/config/configerator.h"
 #include "antioch/base/constants.h"
 
 namespace antioch::base {
@@ -15,7 +17,7 @@ namespace antioch::base {
 using antioch::transit_base::Converter;
 using antioch::transit_base::TransitAgency;
 
-static antioch::bart::BartStation civic_center{antioch::bart::StationIdentifier::CIVC};
+static sfmtc::bart::BartStation civic_center{sfmtc::bart::StationIdentifier::CIVC};
 EventLoop::EventLoop(std::unique_ptr<Config> cfg)
     : boot_time(std::chrono::system_clock::now()),
     config(std::move(cfg)) {
@@ -48,7 +50,7 @@ void EventLoop::init_from_config(const antioch::base::Config*) {
     switch (station.agency()) {
       case TransitAgency::BART: {
         if (staging.find(TransitAgency::BART) == staging.end()) {
-          staging[TransitAgency::BART] = new antioch::bart::BartConverter();
+          staging[TransitAgency::BART] = new bart::BartConverter();
         }
         staging[TransitAgency::BART]->startTracking(station);
         break;

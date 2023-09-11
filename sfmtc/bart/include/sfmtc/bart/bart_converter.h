@@ -9,7 +9,7 @@
 #include "bart_station.h"
 #include "station_arrivals.h"
 
-namespace antioch {
+namespace sfmtc {
 namespace bart {
 
 class BartConverter : public antioch::transit_base::Converter {
@@ -60,7 +60,7 @@ class BartConverter : public antioch::transit_base::Converter {
    */
   void refresh_cache(const std::chrono::time_point<std::chrono::system_clock>& now);
   
-  TrainDescription line_of(const transit_realtime::TripUpdate& tu);
+  BartLine line_of(const transit_realtime::TripUpdate& tu);
 
   std::vector<BartStation> stations;
   std::vector<StationArrivals> cache;
@@ -74,4 +74,4 @@ class InvariantViolation : public std::runtime_error {
 };
 
 }  // namespace bart
-}  // namespace antioch
+}  // namespace sfmtc

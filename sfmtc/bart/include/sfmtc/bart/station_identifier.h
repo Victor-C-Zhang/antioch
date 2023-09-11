@@ -3,11 +3,11 @@
 
 #include <string>
 
-namespace antioch {
+namespace sfmtc {
 namespace bart {
 
 enum StationIdentifier : int {
-  INVALID = 0,
+  INVALID_STATION = 0,
   LAKE = 1,    // Lake Merritt
   FTVL = 2,    // Fruitvale
   COLS = 3,    // Coliseum
@@ -65,4 +65,4 @@ const std::string StationIdentifier_Name(const StationIdentifier id);
 const std::string StationIdentifier_pretty_name(const StationIdentifier id);
 
 }  // namespace bart
-}  // namespace antioch
+}  // namespace sfmtc

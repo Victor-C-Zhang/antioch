@@ -74,14 +74,9 @@ add_library(sfmuni
 target_include_directories(sfmuni PUBLIC sfmuni/include transit_base/include)
 
 # BART
-add_library(bart
-  bart/src/bart_converter.cpp
-  bart/src/bart_line.cpp
-  bart/src/bart_station.cpp
-  bart/src/station_arrivals.cpp
-  bart/src/station_identifier.cpp
-)
-target_include_directories(bart PUBLIC bart/include)
+FILE(GLOB_RECURSE bart-srcs sfmtc/bart/src/*.cpp)
+add_library(bart ${bart-srcs})
+target_include_directories(bart PUBLIC sfmtc/bart/include)
 target_link_libraries(bart PUBLIC transit-base curl-transfer proto-objs)
 
 # Event loop and core code

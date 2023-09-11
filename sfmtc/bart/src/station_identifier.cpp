@@ -1,12 +1,12 @@
 // Copyright Antioch. All rights reserved.
 
-#include "station_identifier.h"
+#include "sfmtc/bart/station_identifier.h"
 
-namespace antioch::bart {
+namespace sfmtc::bart {
 
 const std::string StationIdentifier_pretty_name(const StationIdentifier id) {
   switch (id) {
-    case INVALID:
+    case INVALID_STATION:
       return "Invalid station";
     case LAKE:
       return "Lake Merritt";
@@ -114,8 +114,8 @@ const std::string StationIdentifier_pretty_name(const StationIdentifier id) {
 
 const std::string StationIdentifier_Name(const StationIdentifier id) {
   switch (id) {
-    case INVALID:
-      return "INVALID";
+    case INVALID_STATION:
+      return "INVALID_STATION";
     case LAKE:
       return "LAKE";
     case FTVL:
@@ -217,7 +217,7 @@ const std::string StationIdentifier_Name(const StationIdentifier id) {
     case SFIA:
       return "SFIA";
   }
-  return "INVALID";
+  return "INVALID_STATION";
 }
 
-}  // namespace antioch::bart
+}  // namespace sfmtc::bart
