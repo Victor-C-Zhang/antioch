@@ -124,13 +124,11 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     GTest::gmock_main
   )
 
-  add_executable(bart-test
-    bart/test/test_runner.cpp
-    bart/test/e2e.cpp
-  )
+  FILE(GLOB_RECURSE bart-test-srcs sfmtc/bart/test/*.cpp)
+  add_executable(bart-test ${bart-test-srcs})
   add_dependencies(bart-test bart)
   target_include_directories(bart-test PUBLIC
-    bart/include
+    sfmtc/bart/include
   )
   target_link_libraries(bart-test PUBLIC
     bart
