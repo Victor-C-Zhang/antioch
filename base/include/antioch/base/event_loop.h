@@ -4,6 +4,7 @@
 
 #include <chrono>
 #include <memory>
+#include <vector>
 
 #include <antioch/transit_base/converter.h>
 
@@ -26,7 +27,7 @@ class EventLoop {
   std::chrono::time_point<std::chrono::system_clock> tick;
   std::unique_ptr<Config> config;
   
-  antioch::transit_base::Converter* converter;
+  std::vector<antioch::transit_base::Converter*> converters;
 };
 
 }  // namespace base
