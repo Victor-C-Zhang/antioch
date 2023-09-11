@@ -6,7 +6,7 @@
 namespace sfmtc {
 namespace bart {
 
-enum StationIdentifier : int {
+enum StationIdentifier : int32_t {
   INVALID_STATION = 0,
   LAKE = 1,    // Lake Merritt
   FTVL = 2,    // Fruitvale

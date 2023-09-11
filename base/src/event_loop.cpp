@@ -8,7 +8,6 @@
 #include <map>
 #include <thread>
 
-#include <sfmtc/bart/bart_converter.h>
 #include "antioch/base/config/configerator.h"
 #include "antioch/base/constants.h"
 

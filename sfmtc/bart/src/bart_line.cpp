@@ -76,4 +76,50 @@ const std::string BartLine_pretty_name(const BartLine id) {
   return "Invalid line";
 }
 
+BartLine BartLine_Parse(const std::string& name) {
+  if (name == "BridgeA") {
+    return BridgeA;
+  }
+  if (name == "BridgeB") {
+    return BridgeB;
+  }
+  if (name == "Yellow-N") {
+    return YellowN;
+  }
+  if (name == "Yellow-S") {
+    return YellowS;
+  }
+  if (name == "Orange-N") {
+    return OrangeN;
+  }
+  if (name == "Orange-S") {
+    return OrangeS;
+  }
+  if (name == "Green-N") {
+    return GreenN;
+  }
+  if (name == "Green-S") {
+    return GreenS;
+  }
+  if (name == "Red-N") {
+    return RedN;
+  }
+  if (name == "Red-S") {
+    return RedS;
+  }
+  if (name == "Blue-N") {
+    return BlueN;
+  }
+  if (name == "Blue-S") {
+    return BlueS;
+  }
+  if (name == "Beige-S") {
+    return BeigeS;
+  }
+  if (name == "Beige-N") {
+    return BeigeN;
+  }
+  return INVALID_LINE;
+}
+
 }  // namespace sfmtc::bart

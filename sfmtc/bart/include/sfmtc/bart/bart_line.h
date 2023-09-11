@@ -6,7 +6,7 @@
 namespace sfmtc {
 namespace bart {
 
-enum BartLine : int {
+enum BartLine : int32_t {
   INVALID_LINE = 0,
   BridgeA = 1,  // BridgeA
   BridgeB = 2,  // BridgeB
@@ -26,6 +26,7 @@ enum BartLine : int {
 
 const std::string BartLine_Name(const BartLine& line);
 const std::string BartLine_pretty_name(const BartLine id);
+BartLine BartLine_Parse(const std::string& name);
 
 }  // namespace bart
 }  // namespace sfmtc

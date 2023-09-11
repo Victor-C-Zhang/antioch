@@ -93,6 +93,9 @@ void _Transfer_Internal::start_transfer(const std::string& url, bool follow_redi
   if (follow_redirects) {
     curl_easy_setopt(eh, CURLOPT_FOLLOWLOCATION, 1L);
   }
+  if (curl_easy_setopt(eh, CURLOPT_ACCEPT_ENCODING, "gzip") != CURLE_OK) {
+    throw LibCurlInternalException("curl_easy_setopt encoding failed!");
+  }
   mp->queue_transfer(eh, cb);
 }
 

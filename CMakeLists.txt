@@ -74,21 +74,23 @@ add_library(sfmuni
 target_include_directories(sfmuni PUBLIC sfmuni/include transit_base/include)
 
 # BART
-FILE(GLOB_RECURSE bart-srcs sfmtc/bart/src/*.cpp)
-add_library(bart ${bart-srcs})
-target_include_directories(bart PUBLIC sfmtc/bart/include)
-target_link_libraries(bart PUBLIC transit-base curl-transfer proto-objs)
+FILE(GLOB_RECURSE libbart-srcs sfmtc/bart/src/*.cpp)
+add_library(libbart ${libbart-srcs})
+target_include_directories(libbart PUBLIC sfmtc/bart/include)
+target_link_libraries(libbart PUBLIC transit-base proto-objs)
+
+# SFMTC
+FILE(GLOB_RECURSE sfmtc-srcs sfmtc/common/src/*.cpp)
+add_library(sfmtc ${sfmtc-srcs})
+target_include_directories(sfmtc PUBLIC sfmtc/common/include)
+add_dependencies(sfmtc transit-base libbart curl-transfer proto-objs)
+target_link_libraries(sfmtc PUBLIC transit-base libbart curl-transfer proto-objs)
 
 # Event loop and core code
 FILE(GLOB_RECURSE antioch-base-srcs base/src/*.cpp)
 add_library(antioch-base ${antioch-base-srcs})
 target_include_directories(antioch-base PUBLIC base/include/)
-target_link_libraries(antioch-base PUBLIC
-  transit-base
-  libwifi
-  bart
-  nlohmann_json::nlohmann_json
-)
+target_link_libraries(antioch-base PRIVATE transit-base libwifi sfmtc nlohmann_json::nlohmann_json)
 
 # main exe
 add_executable(antioch
@@ -96,11 +98,12 @@ add_executable(antioch
 )
 add_dependencies(antioch
   antioch-base
-  sfmuni
-  bart
+  sfmtc
 )
 target_link_libraries(antioch PRIVATE
   antioch-base
+  sfmtc
+  nlohmann_json::nlohmann_json
 )
 
 
@@ -124,14 +127,14 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     GTest::gmock_main
   )
 
-  FILE(GLOB_RECURSE bart-test-srcs sfmtc/bart/test/*.cpp)
-  add_executable(bart-test ${bart-test-srcs})
-  add_dependencies(bart-test bart)
-  target_include_directories(bart-test PUBLIC
-    sfmtc/bart/include
+  FILE(GLOB_RECURSE sfmtc-test-srcs sfmtc/common/test/*.cpp)
+  add_executable(sfmtc-test ${sfmtc-test-srcs})
+  add_dependencies(sfmtc-test sfmtc)
+  target_include_directories(sfmtc-test PUBLIC
+    sfmtc/common/include
   )
-  target_link_libraries(bart-test PUBLIC
-    bart
+  target_link_libraries(sfmtc-test PUBLIC
+    sfmtc
     curl-transfer
     GTest::gtest_main
   )

@@ -1,22 +1,21 @@
 // Copyright Antioch. All rights reserved.
 #pragma once
 
-#include <antioch/transit_base/converter.h>
-#include <gtfs-realtime.pb.h>
-
 #include <mutex>
 
-#include "bart_station.h"
+#include <antioch/transit_base/converter.h>
+#include <gtfs-realtime.pb.h>
+#include <sfmtc/bart/bart_station.h>
+
 #include "station_arrivals.h"
 
 namespace sfmtc {
-namespace bart {
 
-class BartConverter : public antioch::transit_base::Converter {
+class SfmtcConverter : public antioch::transit_base::Converter {
  public:
   static constexpr int refreshTimeSecs = 60;
 
-  BartConverter();
+  SfmtcConverter();
 
   /**
    * Start tracking the arrival times and lines into the desired station.
@@ -60,9 +59,7 @@ class BartConverter : public antioch::transit_base::Converter {
    */
   void refresh_cache(const std::chrono::time_point<std::chrono::system_clock>& now);
   
-  BartLine line_of(const transit_realtime::TripUpdate& tu);
-
-  std::vector<BartStation> stations;
+  std::vector<antioch::transit_base::Station> stations;
   std::vector<StationArrivals> cache;
   std::mutex stations_mtx;
   std::chrono::time_point<std::chrono::system_clock> last_fetch;
@@ -73,5 +70,4 @@ class InvariantViolation : public std::runtime_error {
   InvariantViolation(const std::string& what) : std::runtime_error(what) {}
 };
 
-}  // namespace bart
 }  // namespace sfmtc

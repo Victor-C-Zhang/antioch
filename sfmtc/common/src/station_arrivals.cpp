@@ -1,8 +1,10 @@
 // Copyright Antioch. All rights reserved.
 
-#include "sfmtc/bart/station_arrivals.h"
+#include "sfmtc/station_arrivals.h"
 
-namespace sfmtc::bart {
+#include <sfmtc/bart/bart_line.h>
+
+namespace sfmtc {
 
 StationArrivals::StationArrivals(antioch::transit_base::Station station,
                                  std::vector<TrainArrival>&& arrivals)
@@ -13,10 +15,10 @@ std::string StationArrivals::bart_to_string() const {
   std::stringstream res;
   for (auto& arrival : arrivals_) {
     auto time_mins = (arrival.second - now) / 60;
-    res << BartLine_pretty_name(arrival.first);
+    res << bart::BartLine_pretty_name((bart::BartLine)arrival.first);
     res << ": " << time_mins << " mins\n";
   }
   return res.str();
 }
 
-}  // namespace sfmtc::bart
+}  // namespace sfmtc

@@ -2,8 +2,6 @@
 
 #include "sfmtc/bart/bart_station.h"
 
-#include "sfmtc/bart/bart_converter.h"
-
 namespace sfmtc::bart {
 
 BartStation::BartStation(StationIdentifier id)
@@ -11,7 +9,7 @@ BartStation::BartStation(StationIdentifier id)
 
 BartStation::BartStation(const Station& station) : BartStation((StationIdentifier)station.id()) {
   if (station.agency() != antioch::transit_base::TransitAgency::BART) {
-    throw InvariantViolation("Station is not a BART station");
+    throw antioch::transit_base::StationInvariantViolation("Station is not a BART station");
   }
 }
 

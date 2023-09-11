@@ -3,12 +3,9 @@
 
 #include <antioch/transit_base/converter.h>
 
-#include "bart_line.h"
-
 namespace sfmtc {
-namespace bart {
 
-typedef std::pair<BartLine, int64_t> TrainArrival;
+typedef std::pair<int32_t, int64_t> TrainArrival;
 
 class StationArrivals {
  public:
@@ -23,5 +20,4 @@ class StationArrivals {
   std::vector<TrainArrival> arrivals_;
 };
 
-}  // namespace bart
 }  // namespace sfmtc
