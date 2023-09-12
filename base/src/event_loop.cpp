@@ -17,7 +17,7 @@ namespace antioch::base {
 using antioch::transit_base::Converter;
 using antioch::transit_base::TransitAgency;
 
-static sfmtc::bart::BartStation civic_center{sfmtc::bart::StationIdentifier::CIVC};
+static bart::BartStation civic_center{bart::StationIdentifier::CIVC};
 EventLoop::EventLoop(std::unique_ptr<Config> cfg)
     : boot_time(std::chrono::system_clock::now()),
     config(std::move(cfg)) {

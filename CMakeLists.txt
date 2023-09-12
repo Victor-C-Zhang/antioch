@@ -136,6 +136,16 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     GTest::gmock_main
   )
 
+  add_executable(bart-test
+    bart/test/e2e.cpp
+  )
+  add_dependencies(bart-test bart)
+  target_link_libraries(bart-test PUBLIC
+    bart
+    GTest::gtest_main
+    GTest::gmock_main
+  )
+
   FILE(GLOB_RECURSE sfmtc-test-srcs sfmtc/common/test/*.cpp)
   add_executable(sfmtc-test ${sfmtc-test-srcs})
   add_dependencies(sfmtc-test sfmtc)

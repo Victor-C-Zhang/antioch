@@ -1,6 +1,7 @@
 // Copyright Antioch. All rights reserved.
 
 #include <chrono>
+#include <condition_variable>
 #include <iostream>
 #include <thread>
 #include <mutex>
@@ -39,4 +40,26 @@ TEST(E2E, DISABLED_curlApart) {
   std::cout << "End sleep" << std::endl;
   antioch::connectivity::curl_transfer::start_transfer("api.bart.gov/gtfsrt/tripupdate.aspx", true, cb2);
   std::this_thread::sleep_for(std::chrono::seconds(4));
+}
+
+bool poor_man_latch = false;
+std::condition_variable cv;
+std::mutex mtx;
+std::string data;
+
+TEST(E2E, DISABLED_getCompressed) {
+  auto cb = [](std::string str) {
+    std::lock_guard lg(mtx);
+    std::cout << "Got " << str.size() << " chars" << std::endl;
+    std::cout << str << std::endl;
+    poor_man_latch = true;
+    cv.notify_all();
+  };
+  antioch::connectivity::curl_transfer::start_transfer("http://httpbin.org/gzip", false,
+                                                       cb);
+  {
+    std::unique_lock l(mtx);
+    cv.wait(l, [&] { return poor_man_latch; });
+  }
+  std::cout << "F" << std::endl;
 }
