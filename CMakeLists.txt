@@ -80,11 +80,17 @@ target_include_directories(bart PUBLIC bart/include)
 target_link_libraries(bart PUBLIC transit-base curl-transfer proto-objs)
 
 # SFMTC
+# BART sub-library
+FILE(GLOB_RECURSE sfmtc-bart-srcs sfmtc/bart/src/*.cpp)
+add_library(sfmtc-bart ${sfmtc-bart-srcs})
+target_include_directories(sfmtc-bart PUBLIC sfmtc/bart/include)
+target_link_libraries(sfmtc-bart transit-base proto-objs)
+
 FILE(GLOB_RECURSE sfmtc-srcs sfmtc/common/src/*.cpp)
 add_library(sfmtc ${sfmtc-srcs})
 target_include_directories(sfmtc PUBLIC sfmtc/common/include)
 add_dependencies(sfmtc transit-base curl-transfer proto-objs)
-target_link_libraries(sfmtc PUBLIC transit-base curl-transfer proto-objs)
+target_link_libraries(sfmtc PUBLIC transit-base sfmtc-bart curl-transfer proto-objs)
 
 # Event loop and core code
 FILE(GLOB_RECURSE antioch-base-srcs base/src/*.cpp)
