@@ -2,12 +2,12 @@
 
 #include "antioch/base/event_loop.h"
 
+#include <bart_converter.h>
+
 #include <iostream>
 #include <map>
 #include <thread>
 
-#include <bart_converter.h>
-#include "antioch/base/config/configerator.h"
 #include "antioch/base/constants.h"
 
 namespace antioch::base {
@@ -16,24 +16,14 @@ using antioch::transit_base::Converter;
 using antioch::transit_base::TransitAgency;
 
 static antioch::bart::BartStation civic_center{antioch::bart::StationIdentifier::CIVC};
-EventLoop::EventLoop() : boot_time(std::chrono::system_clock::now()) {
+EventLoop::EventLoop(std::unique_ptr<Config> cfg)
+    : boot_time(std::chrono::system_clock::now()),
+    config(std::move(cfg)) {
   tick = boot_time;
-  try {
-    config = std::move(Configerator::read_or_exception());
-  } catch (std::exception& e) {
-    // TODO: print to console
-    std::cerr << "Using default config, exception reading saved config: " << e.what() << std::endl;
-    config = std::move(Configerator::default_config());
-  }
 }
 
 void EventLoop::run() {
   init_from_config(config.get());
-  try {
-    Configerator::write_or_exception(*config);
-  } catch (const std::exception& e) {
-    std::cerr << "Exception writing config: " << e.what() << std::endl;
-  }
 
   while (1) {
     run_tick();

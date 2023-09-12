@@ -16,7 +16,7 @@ namespace base {
 
 class EventLoop {
  public:
-  EventLoop();
+  EventLoop(std::unique_ptr<Config> cfg);
   void run();
 
  private:
