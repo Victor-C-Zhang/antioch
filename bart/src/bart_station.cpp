@@ -2,7 +2,7 @@
 
 #include "bart/bart_station.h"
 
-namespace sfmtc::bart {
+namespace bart {
 
 BartStation::BartStation(StationIdentifier id)
     : Station(antioch::transit_base::TransitAgency::BART, id) {}
@@ -17,4 +17,4 @@ std::string BartStation::pretty_name() const {
   return StationIdentifier_pretty_name((StationIdentifier)id());
 }
 
-}  // namespace sfmtc::bart
+}  // namespace bart

@@ -74,23 +74,29 @@ add_library(sfmuni
 target_include_directories(sfmuni PUBLIC sfmuni/include transit_base/include)
 
 # BART
-FILE(GLOB_RECURSE libbart-srcs sfmtc/bart/src/*.cpp)
-add_library(libbart ${libbart-srcs})
-target_include_directories(libbart PUBLIC sfmtc/bart/include)
-target_link_libraries(libbart PUBLIC transit-base proto-objs)
+FILE(GLOB_RECURSE bart-srcs bart/src/*.cpp)
+add_library(bart ${bart-srcs})
+target_include_directories(bart PUBLIC bart/include)
+target_link_libraries(bart PUBLIC transit-base curl-transfer proto-objs)
 
 # SFMTC
 FILE(GLOB_RECURSE sfmtc-srcs sfmtc/common/src/*.cpp)
 add_library(sfmtc ${sfmtc-srcs})
 target_include_directories(sfmtc PUBLIC sfmtc/common/include)
-add_dependencies(sfmtc transit-base libbart curl-transfer proto-objs)
-target_link_libraries(sfmtc PUBLIC transit-base libbart curl-transfer proto-objs)
+add_dependencies(sfmtc transit-base curl-transfer proto-objs)
+target_link_libraries(sfmtc PUBLIC transit-base curl-transfer proto-objs)
 
 # Event loop and core code
 FILE(GLOB_RECURSE antioch-base-srcs base/src/*.cpp)
 add_library(antioch-base ${antioch-base-srcs})
 target_include_directories(antioch-base PUBLIC base/include/)
-target_link_libraries(antioch-base PRIVATE transit-base libwifi sfmtc nlohmann_json::nlohmann_json)
+target_link_libraries(antioch-base PUBLIC transit-base libwifi sfmtc bart nlohmann_json::nlohmann_json)
+add_dependencies(antioch-base
+  transit-base
+  bart
+  sfmtc
+  libwifi
+)
 
 # main exe
 add_executable(antioch
@@ -98,12 +104,9 @@ add_executable(antioch
 )
 add_dependencies(antioch
   antioch-base
-  sfmtc
 )
 target_link_libraries(antioch PRIVATE
   antioch-base
-  sfmtc
-  nlohmann_json::nlohmann_json
 )
 
 
