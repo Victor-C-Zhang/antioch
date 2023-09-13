@@ -193,34 +193,29 @@ GFX_API Result Device::submit(uint32_t submitCount, const SubmitInfo* pSubmits) 
           uint8_t* pData = static_cast<uint8_t*>(glyph->createInfo.buffer->memory->data);
           for (int32_t x = 0; x < glyph->createInfo.extent.x; ++x) {
             for (int32_t y = 0; y < glyph->createInfo.extent.y; ++y) {
+              Vector2D screenPos = Vector2D{.x = x + offset.x, .y = y + offset.y};
               switch (renderTarget->createInfo.edgeBehaviour) {
                 case EdgeBehaviour::eClamp: {
-                  if (x + offset.x >= width || y + offset.y >= height || x + offset.x < 0 ||
-                      y + offset.y < 0) {
+                  if (screenPos.x >= width || screenPos.y >= height || screenPos.x < 0 ||
+                      screenPos.y < 0) {
                     continue;
                   }
                   break;
                 }
                 case EdgeBehaviour::eWrap: {
-                  if (x + offset.x >= width || y + offset.y >= height || x + offset.x < 0 ||
-                      y + offset.y < 0) {
-                    if (x + offset.x >= width) {
-                      x %= width;
+                  if (screenPos.x >= width || screenPos.y >= height || screenPos.x < 0 ||
+                      screenPos.y < 0) {
+                    if (screenPos.x >= width || screenPos.x < 0) {
+                      screenPos.x %= width;
                     }
-                    if (y + offset.y >= height) {
-                      y %= height;
-                    }
-                    if (x < 0) {
-                      x %= width;
-                    }
-                    if (y < 0) {
-                      y %= height;
+                    if (screenPos.y >= height || screenPos.y < 0) {
+                      screenPos.y %= height;
                     }
                   }
                   break;
                 }
               }
-              size_t screenIdx = ((y + offset.y) * width + x + offset.x) * numChannels;
+              size_t screenIdx = ((screenPos.y) * width + screenPos.x) * numChannels;
               size_t memoryIdx =
                   glyph->createInfo.buffer->memoryOffset + glyph->createInfo.bufferOffset;
               uint32_t dataBit = 0;
