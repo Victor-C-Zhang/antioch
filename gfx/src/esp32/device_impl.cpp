@@ -2,7 +2,7 @@
 
 #define MATRIX_WIDTH 64
 #define MATRIX_HEIGHT 32
-#define CHAIN_LENGTH 1
+#define CHAIN_LENGTH 2
 
 #include <ESP32-HUB75-MatrixPanel-I2S-DMA.h>
 #include <gfx/gfx.h>
@@ -27,7 +27,6 @@ Result implCreateDevice(Device_t* baseDevice) {
 
   device->display = new MatrixPanel_I2S_DMA(mxconfig);
   device->display->begin();
-  device->display->setBrightness8(255);
 
   return Result::eSuccess;
 }
@@ -53,8 +52,8 @@ Result implSubmit(Device_t* baseDevice, uint32_t submitCount, const SubmitInfo* 
     uint32_t currCol = 0;
     uint32_t currColCount = 0;
 
-    for (uint32_t i = 0; i < width; i++) {
-      for (uint32_t j = 0; j < height; j++) {
+    for (uint32_t j = 0; j < height; j++) {
+      for (uint32_t i = 0; i < width; i++) {
         uint8_t r = renderTarget->screen[j * width * 3 + i * 3];
         uint8_t g = renderTarget->screen[j * width * 3 + i * 3 + 1];
         uint8_t b = renderTarget->screen[j * width * 3 + i * 3 + 2];
@@ -62,15 +61,18 @@ Result implSubmit(Device_t* baseDevice, uint32_t submitCount, const SubmitInfo* 
         if ((r | g << 8 | b << 16) == currCol) {
           currColCount++;
         } else {
-          device->display->drawFastVLine(i, j - currColCount, currColCount, currCol & 0xFF,
-                                         (currCol >> 8) & 0xFF, (currCol >> 16) & 0xFF);
+          if (currCol != 0) {
+            device->display->drawFastHLine(i - currColCount, j, currColCount, currCol & 0xFF,
+                                           (currCol >> 8) & 0xFF, (currCol >> 16) & 0xFF);
+          }
+
           currCol = r | g << 8 | b << 16;
           currColCount = 1;
         }
 
         // Flush rest
-        if (j == height - 1) {
-          device->display->drawFastVLine(i, j - currColCount + 1, currColCount, r, g, b);
+        if (i == width - 1) {
+          device->display->drawFastHLine(i - currColCount + 1, j, currColCount, r, g, b);
         }
       }
     }

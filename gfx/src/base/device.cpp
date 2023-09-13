@@ -191,10 +191,34 @@ GFX_API Result Device::submit(uint32_t submitCount, const SubmitInfo* pSubmits) 
           offset += state.drawData[drawIdx].prims[primIdx].offset;
           Glyph glyph = state.drawData[drawIdx].prims[primIdx].glyph;
           uint8_t* pData = static_cast<uint8_t*>(glyph->createInfo.buffer->memory->data);
-          for (uint32_t x = 0; x < glyph->createInfo.extent.x; ++x) {
-            for (uint32_t y = 0; y < glyph->createInfo.extent.y; ++y) {
-              if (x + offset.x >= width || y + offset.y >= height) {
-                continue;
+          for (int32_t x = 0; x < glyph->createInfo.extent.x; ++x) {
+            for (int32_t y = 0; y < glyph->createInfo.extent.y; ++y) {
+              switch (renderTarget->createInfo.edgeBehaviour) {
+                case EdgeBehaviour::eClamp: {
+                  if (x + offset.x >= width || y + offset.y >= height || x + offset.x < 0 ||
+                      y + offset.y < 0) {
+                    continue;
+                  }
+                  break;
+                }
+                case EdgeBehaviour::eWrap: {
+                  if (x + offset.x >= width || y + offset.y >= height || x + offset.x < 0 ||
+                      y + offset.y < 0) {
+                    if (x + offset.x >= width) {
+                      x %= width;
+                    }
+                    if (y + offset.y >= height) {
+                      y %= height;
+                    }
+                    if (x < 0) {
+                      x %= width;
+                    }
+                    if (y < 0) {
+                      y %= height;
+                    }
+                  }
+                  break;
+                }
               }
               size_t screenIdx = ((y + offset.y) * width + x + offset.x) * numChannels;
               size_t memoryIdx =

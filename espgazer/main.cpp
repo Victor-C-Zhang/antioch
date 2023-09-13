@@ -59,8 +59,9 @@ extern "C" void app_main(void) {
   CHECK_ERROR(instance.createDevice(deviceInfo, nullptr, &device));
 
   RenderTargetCreateInfo renderTargetInfo{};
-  renderTargetInfo.extents = {.x = SCREEN_WIDTH, .y = SCREEN_HEIGHT};
+  renderTargetInfo.extents = {.x = 128, .y = 32};
   renderTargetInfo.numChannels = 3;
+  renderTargetInfo.edgeBehaviour = EdgeBehaviour::eWrap;
   RenderTarget renderTarget;
   CHECK_ERROR(device.createRenderTarget(renderTargetInfo, nullptr, &renderTarget));
 
@@ -107,46 +108,34 @@ extern "C" void app_main(void) {
   }
 
   BrushCreateInfo brushInfo{};
-  brushInfo.brushColour = {.r = 0x00, .g = 0xFF, .b = 0x00};
+  brushInfo.brushColour = {.r = 0xFF, .g = 0xFF, .b = 0xFF};
   Brush brush;
   CHECK_ERROR(device.createBrush(brushInfo, nullptr, &brush));
 
   CommandBufferBeginInfo beginInfo{};
-  beginInfo.clearColour.r = 0x10;
-  beginInfo.clearColour.g = 0xff;
-  beginInfo.clearColour.b = 0xFF;
-  CHECK_ERROR(cmdBuf.reset());
-  CHECK_ERROR(cmdBuf.begin(beginInfo));
-  CHECK_ERROR(cmdBuf.bindBrush(brush));
-  CHECK_ERROR(cmdBuf.bindGlyph(255, glyphs));
+  beginInfo.clearColour.r = 0x00;
+  beginInfo.clearColour.g = 0x00;
+  beginInfo.clearColour.b = 0x00;
 
   std::string text1 = "Hello...";
   std::string text2 = "world?";
   std::string text3 = "@antioch";
 
-  uint32_t x = 32;
-
-  CHECK_ERROR(cmdBuf.drawText(text1.c_str(), text1.size(), {.x = 64 - x, .y = 1}));
-  CHECK_ERROR(cmdBuf.drawText(text2.c_str(), text2.size(), {.x = 64 - x, .y = 9}));
-  CHECK_ERROR(cmdBuf.drawText(text3.c_str(), text3.size(), {.x = 64 - x, .y = 17}));
-
-  CHECK_ERROR(cmdBuf.end());
-
-  printf("End command buffer recording\n");
+  int32_t x = 128;
 
   SubmitInfo submitInfo = {
       .renderTarget = renderTarget, .commandBufferCount = 1, .pCommandBuffers = &cmdBuf};
 
-  for (uint32_t frame = 0; frame < 500; frame++) {
-    x = (x + 1) % 128;
+  for (uint32_t frame = 0; frame < 2048; frame++) {
+    x = (x + 1) % 256;
     CHECK_ERROR(cmdBuf.reset());
     CHECK_ERROR(cmdBuf.begin(beginInfo));
     CHECK_ERROR(cmdBuf.bindBrush(brush));
     CHECK_ERROR(cmdBuf.bindGlyph(255, glyphs));
 
-    CHECK_ERROR(cmdBuf.drawText(text1.c_str(), text1.size(), {.x = 64 - x, .y = 1}));
-    CHECK_ERROR(cmdBuf.drawText(text2.c_str(), text2.size(), {.x = 64 - x, .y = 9}));
-    CHECK_ERROR(cmdBuf.drawText(text3.c_str(), text3.size(), {.x = 64 - x, .y = 17}));
+    CHECK_ERROR(cmdBuf.drawText(text1.c_str(), text1.size(), {.x = 128 - x, .y = 1}));
+    CHECK_ERROR(cmdBuf.drawText(text2.c_str(), text2.size(), {.x = 128 - x, .y = 9}));
+    CHECK_ERROR(cmdBuf.drawText(text3.c_str(), text3.size(), {.x = 128 - x, .y = 17}));
 
     CHECK_ERROR(cmdBuf.end());
 
