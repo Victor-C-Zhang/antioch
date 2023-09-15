@@ -36,6 +36,8 @@ struct Vector2D {
     y += other.y;
     return *this;
   }
+
+  inline Vector2D operator*(const int32_t& other) const { return {.x = x * other, .y = y * other}; }
 };
 
 struct AllocationCallback {
