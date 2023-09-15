@@ -140,8 +140,8 @@ extern "C" void app_main(void) {
     CHECK_ERROR(cmdBuf.end());
 
     CHECK_ERROR(device.submit(1, &submitInfo));
-    printf("Waiting 10ms....\n");
-    vTaskDelay(50 / portTICK_PERIOD_MS);
+    printf("Waiting 100ms....\n");
+    vTaskDelay(100 / portTICK_PERIOD_MS);
   }
 
   CHECK_ERROR(device.destroyBrush(brush));
