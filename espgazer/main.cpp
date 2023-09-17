@@ -107,45 +107,90 @@ extern "C" void app_main(void) {
     CHECK_ERROR(device.createGlyph(glyphInfo, nullptr, &glyphs[i]));
   }
 
+  const uint32_t numColours = 8;
+  uint32_t colours[numColours];
+
+  for (uint32_t i = 0; i < numColours; i++) {
+    colours[i] = 0;
+    for (uint32_t j = 0; j < 3; j++) {
+      if (i & (1 << j)) {
+        colours[i] |= 0xFF << (j * 8);
+      }
+    }
+  }
+
   BrushCreateInfo brushInfo{};
-  brushInfo.brushColour = {.r = 0xFF, .g = 0xFF, .b = 0xFF};
-  Brush brush;
-  CHECK_ERROR(device.createBrush(brushInfo, nullptr, &brush));
+  Brush brushes[8];
+  for (uint32_t i = 0; i < numColours; i++) {
+    brushInfo.brushColour = {.r = static_cast<uint8_t>((colours[i]) & 0xFF),
+                             .g = static_cast<uint8_t>((colours[i] >> 8) & 0xFF),
+                             .b = static_cast<uint8_t>((colours[i] >> 16) & 0xFF)};
+    CHECK_ERROR(device.createBrush(brushInfo, nullptr, &brushes[i]));
+  }
 
-  CommandBufferBeginInfo beginInfo{};
-  beginInfo.clearColour.r = 0x00;
-  beginInfo.clearColour.g = 0x00;
-  beginInfo.clearColour.b = 0x00;
+  CommandBufferBeginInfo begins[8];
 
-  std::string text1 = "Hello...";
-  std::string text2 = "world?";
-  std::string text3 = "@antioch";
-
-  int32_t x = 128;
-
+  for (uint32_t i = 0; i < numColours; i++) {
+    begins[i] = {
+        .clearColour = {.r = static_cast<uint8_t>((colours[numColours - i - 1]) & 0xFF),
+                        .g = static_cast<uint8_t>((colours[numColours - i - 1] >> 8) & 0xFF),
+                        .b = static_cast<uint8_t>((colours[numColours - i - 1] >> 16) & 0xFF)}};
+  }
+  std::string text[3] = {"Hello...", "world?", "#IYKYK"};
+  Vector2D pos[3] = {{.x = 128, .y = 4}, {.x = 128, .y = 12}, {.x = 128, .y = 20}};
   SubmitInfo submitInfo = {
       .renderTarget = renderTarget, .commandBufferCount = 1, .pCommandBuffers = &cmdBuf};
 
-  for (uint32_t frame = 0; frame < 2048; frame++) {
-    x = (x + 1) % 256;
+  const uint32_t bpm = 126;
+  const uint32_t fpb = 4;
+  const uint32_t durationMin = 5;
+  const auto Hz = (60 * configTICK_RATE_HZ) / (fpb * bpm);
+  uint32_t frame = 0;
+  for (; frame < fpb * bpm * durationMin;) {
+    frame = (frame + 1) % (fpb * bpm * durationMin);
+    uint32_t brushColIdx = (frame / (fpb)) % 2 == 0 ? 2 : 0;
+    uint32_t clearColIdx = (frame / (fpb)) % 2 == 0 ? 7 : 5;
+    uint32_t colIdx = (frame / (fpb)) % numColours;
+
+    uint32_t scene = frame / (fpb * bpm);
+    scene = 1;
+    Vector2D speed = {.x = -2, .y = 0};
+    Vector2D offset = speed * ((frame) / fpb);
+
     CHECK_ERROR(cmdBuf.reset());
-    CHECK_ERROR(cmdBuf.begin(beginInfo));
-    CHECK_ERROR(cmdBuf.bindBrush(brush));
+    CHECK_ERROR(cmdBuf.begin(begins[colIdx]));
+    CHECK_ERROR(cmdBuf.bindBrush(brushes[colIdx]));
     CHECK_ERROR(cmdBuf.bindGlyph(255, glyphs));
 
-    CHECK_ERROR(cmdBuf.drawText(text1.c_str(), text1.size(), {.x = 128 - x, .y = 1}));
-    CHECK_ERROR(cmdBuf.drawText(text2.c_str(), text2.size(), {.x = 128 - x, .y = 9}));
-    CHECK_ERROR(cmdBuf.drawText(text3.c_str(), text3.size(), {.x = 128 - x, .y = 17}));
+    switch (scene) {
+      case 1: {
+        for (uint32_t i = 0; i < 3; i++) {
+          CHECK_ERROR(cmdBuf.drawText(text[2].c_str(), text[2].size(),
+                                      pos[i] + offset * ((i & 1) == 0 ? -1 : 1)));
+
+          CHECK_ERROR(cmdBuf.drawText(text[2].c_str(), text[2].size(),
+                                      pos[i] + speed * 32 + offset * ((i & 1) == 0 ? -1 : 1)));
+        }
+        break;
+      }
+      default: {
+        for (uint32_t i = 0; i < 3; i++) {
+          CHECK_ERROR(cmdBuf.drawText(text[i].c_str(), text[i].size(), pos[i] + offset));
+        }
+        break;
+      }
+    }
 
     CHECK_ERROR(cmdBuf.end());
 
     CHECK_ERROR(device.submit(1, &submitInfo));
-    printf("Waiting 100ms....\n");
-    vTaskDelay(100 / portTICK_PERIOD_MS);
+
+    vTaskDelay(Hz);
   }
 
-  CHECK_ERROR(device.destroyBrush(brush));
-
+  for (uint32_t i = 0; i < numColours; i++) {
+    CHECK_ERROR(device.destroyBrush(brushes[i]));
+  }
   for (uint32_t i = 0; i < 255; i++) {
     CHECK_ERROR(device.destroyGlyph(glyphs[i]));
   }
