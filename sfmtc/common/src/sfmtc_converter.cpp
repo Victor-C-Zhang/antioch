@@ -11,7 +11,8 @@
 #include <chrono>
 #include <typeinfo>
 
-#define STRING(s) #s
+#define STRING(x) _STR(x)
+#define _STR(x) #x
 
 namespace sfmtc {
 
@@ -21,6 +22,15 @@ using antioch::transit_base::StationTrackingException;
 using namespace transit_realtime;
 
 static std::string API_KEY = STRING(API_KEY_511);
+SfmtcConverter* SfmtcConverter::singleton_instance = nullptr;
+
+SfmtcConverter* SfmtcConverter::instance() {
+  if (singleton_instance != nullptr) {
+    return singleton_instance;
+  }
+  singleton_instance = new SfmtcConverter();
+  return singleton_instance;
+}
 
 SfmtcConverter::SfmtcConverter() : last_fetch(std::chrono::system_clock::now()) {}
 
@@ -159,6 +169,7 @@ void SfmtcConverter::refresh_cache(const std::chrono::time_point<std::chrono::sy
     latch.count_down();
   };
   std::string url = "http://api.511.org/transit/TripUpdates?api_key=" + API_KEY + "&agency=RG";
+  std::cout << url << std::endl;
   antioch::connectivity::curl_transfer::start_transfer(url, false, cb);
   if (!latch.wait_or_timeout(std::chrono::seconds(15))) {
     std::cerr << "Timed out waiting for SFMTC API fetch!" << std::endl;

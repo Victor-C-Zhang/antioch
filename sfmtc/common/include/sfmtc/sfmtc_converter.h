@@ -14,7 +14,9 @@ class SfmtcConverter : public antioch::transit_base::Converter {
  public:
   static constexpr int refreshTimeSecs = 60;
 
-  SfmtcConverter();
+  // TODO: this will leak memory if the converter is ever not needed, e.g. if we stop tracking any
+  // SF agencies
+  static SfmtcConverter* instance();
 
   /**
    * Start tracking the arrival times and lines into the desired station.
@@ -41,6 +43,9 @@ class SfmtcConverter : public antioch::transit_base::Converter {
   std::string convert_to_string(const std::vector<std::byte>& data);
 
  private:
+  static SfmtcConverter* singleton_instance;
+
+  SfmtcConverter();
 
   /**
    * Increment last_fetch by REFRESH_TIME_SECS s.t. it is the greatest value less or equal to now.

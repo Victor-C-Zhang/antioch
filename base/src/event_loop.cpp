@@ -50,14 +50,14 @@ void EventLoop::init_from_config(const antioch::base::Config*) {
     switch (station.agency()) {
       case TransitAgency::BART: {
         if (staging.find(TransitAgency::BART) == staging.end()) {
-          staging[TransitAgency::BART] = new bart::BartConverter();
+          staging[TransitAgency::BART] = sfmtc::SfmtcConverter::instance();
         }
         staging[TransitAgency::BART]->startTracking(station);
         break;
       }
       case TransitAgency::SF_MUNI: {
         if (staging.find(TransitAgency::SF_MUNI) == staging.end()) {
-          // TODO muni converter
+          staging[TransitAgency::SF_MUNI] = sfmtc::SfmtcConverter::instance();
         }
         staging[TransitAgency::SF_MUNI]->startTracking(station);
         break;
