@@ -30,6 +30,9 @@ add_compile_options(-fno-rtti)
 #add_compile_options(-fsanitize=address)
 #add_link_options(-fsanitize=address)
 
+# API Key for SFMTC api.511.org
+file(STRINGS "${PROJECT_SOURCE_DIR}/build/api_key_511" API_KEY_511)
+
 # Switch dependencies and HAL impls based on product
 include(product/common.cmake)
 if(PRODUCT STREQUAL "LINUX")
@@ -89,6 +92,7 @@ target_link_libraries(sfmtc-bart transit-base proto-objs)
 FILE(GLOB_RECURSE sfmtc-srcs sfmtc/common/src/*.cpp)
 add_library(sfmtc ${sfmtc-srcs})
 target_include_directories(sfmtc PUBLIC sfmtc/common/include)
+target_compile_definitions(sfmtc PRIVATE -DAPI_KEY_511=${API_KEY_511})
 add_dependencies(sfmtc transit-base curl-transfer proto-objs)
 target_link_libraries(sfmtc PUBLIC transit-base sfmtc-bart curl-transfer proto-objs)
 
