@@ -5,7 +5,8 @@
 
 namespace sfmtc {
 
-typedef std::pair<int32_t, int64_t> TrainArrival;
+// {line ID, direction}, unix time
+typedef std::pair<std::pair<int32_t, bool>, int64_t> TrainArrival;
 
 class StationArrivals {
  public:

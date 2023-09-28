@@ -16,7 +16,7 @@ std::string StationArrivals::bart_to_string() const {
   std::stringstream res;
   for (auto& arrival : arrivals_) {
     auto time_mins = (arrival.second - now) / 60;
-    res << sfmtc::bart::BartLine_pretty_name((sfmtc::bart::BartLine)arrival.first);
+    res << sfmtc::bart::BartLine_pretty_name((sfmtc::bart::BartLine)arrival.first.first);
     res << ": " << time_mins << " mins\n";
   }
   return res.str();
@@ -27,8 +27,9 @@ std::string StationArrivals::muni_to_string() const {
   std::stringstream res;
   for (auto& arrival : arrivals_) {
     auto time_mins = (arrival.second - now) / 60;
-    res << sfmtc::muni::MuniLine_pretty_name((sfmtc::muni::MuniLine)arrival.first);
-    res << ": " << time_mins << " mins\n";
+    res << sfmtc::muni::MuniLine_pretty_name((sfmtc::muni::MuniLine)arrival.first.first)
+        << (arrival.first.second ? " Inbound" : " Outbound")
+        << ": " << time_mins << " mins\n";
   }
   return res.str();
 }

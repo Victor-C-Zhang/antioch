@@ -158,6 +158,7 @@ std::vector<StationArrivals> SfmtcConverter::convert(const std::string& data) {
       for (int j = 0; j < fm.entity_size(); ++j) {
         const auto& trip_update = fm.entity(j).trip_update();
         const auto& agency = trip_update.trip().route_id().substr(0, 2);
+        const bool direction = trip_update.trip().direction_id();
         if (agency != agencyCode) {
           continue;
         }
@@ -167,7 +168,7 @@ std::vector<StationArrivals> SfmtcConverter::convert(const std::string& data) {
           for (int k = 0; k < trip_update.stop_time_update_size(); ++k) {
             const auto& stop = trip_update.stop_time_update(k);
             if (sfmtc::bart::StationIdentifier_Name((sfmtc::bart::StationIdentifier)(stations[i].id())) == stop.stop_id()) {
-              arrival_vec.push_back({line, stop.arrival().time()});
+              arrival_vec.push_back({{line, direction}, stop.arrival().time()});
             }
           }
         } else if (agencyCode == "SF") {
@@ -175,7 +176,7 @@ std::vector<StationArrivals> SfmtcConverter::convert(const std::string& data) {
           for (int k = 0; k < trip_update.stop_time_update_size(); ++k) {
             const auto& stop = trip_update.stop_time_update(k);
             if (sfmtc::muni::StationIdentifier_Name((sfmtc::muni::StationIdentifier)(stations[i].id())) == stop.stop_id()) {
-              arrival_vec.push_back({line, stop.arrival().time()});
+              arrival_vec.push_back({{line, direction}, stop.arrival().time()});
             }
           }
         }
