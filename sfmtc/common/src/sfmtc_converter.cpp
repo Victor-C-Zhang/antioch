@@ -7,6 +7,9 @@
 #include <gtfs-realtime.pb.h>
 #include <sfmtc/bart/bart_station.h>
 #include <sfmtc/bart/util.h>
+#include <sfmtc/muni/muni_station.h>
+#include <sfmtc/muni/util.h>
+
 
 #include <chrono>
 #include <typeinfo>
@@ -36,7 +39,8 @@ SfmtcConverter::SfmtcConverter() : last_fetch(std::chrono::system_clock::now()) 
 
 void SfmtcConverter::startTracking(const Station& station) {
   switch (station.agency()) {
-    case antioch::transit_base::TransitAgency::BART: {
+    case antioch::transit_base::TransitAgency::BART:
+    case antioch::transit_base::TransitAgency::SF_MUNI: {
       std::scoped_lock<std::mutex> l(stations_mtx);
       stations.push_back(station);
       refresh_cache(std::chrono::system_clock::now());
@@ -52,7 +56,8 @@ void SfmtcConverter::startTracking(const Station& station) {
 
 void SfmtcConverter::stopTracking(const Station& station) {
   switch (station.agency()) {
-    case antioch::transit_base::TransitAgency::BART: {
+    case antioch::transit_base::TransitAgency::BART:
+    case antioch::transit_base::TransitAgency::SF_MUNI: {
       std::scoped_lock<std::mutex> l(stations_mtx);
       for (unsigned i = 0; i < stations.size(); ++i) {
         if (stations[i] == station) {
@@ -85,6 +90,23 @@ std::string SfmtcConverter::get(const Station& station) {
       // fallthrough
       const sfmtc::bart::BartStation bStation(station);
       std::string msg = "Not currently tracking station " + bStation.pretty_name();
+      throw StationGetException(msg);
+      break;
+    }
+    case antioch::transit_base::TransitAgency::SF_MUNI: {
+      std::scoped_lock<std::mutex> l(stations_mtx);
+      auto now = std::chrono::system_clock::now();
+      if (now - last_fetch >= std::chrono::seconds(refreshTimeSecs)) {
+        refresh_cache(now);
+      }
+      for (const auto& arrivals : cache) {
+        if (station == arrivals.station()) {
+          return arrivals.muni_to_string();
+        }
+      }
+      // fallthrough
+      const sfmtc::muni::MuniStation mStation(station);
+      std::string msg = "Not currently tracking station " + mStation.pretty_name();
       throw StationGetException(msg);
       break;
     }
@@ -121,10 +143,14 @@ std::vector<StationArrivals> SfmtcConverter::convert(const std::string& data) {
     for (size_t i = 0; i < stations.size(); ++i) {
       std::string agencyCode;
       switch (stations[i].agency()) {
-        case antioch::transit_base::TransitAgency::BART:
+        case antioch::transit_base::TransitAgency::BART: {
           agencyCode = "BA";
           break;
-        // TODO
+        }
+        case antioch::transit_base::TransitAgency::SF_MUNI: {
+          agencyCode = "SF";
+          break;
+        }
         default:
           throw InvariantViolation("Tracked station is not in the SFMTC system");
       }
@@ -141,6 +167,14 @@ std::vector<StationArrivals> SfmtcConverter::convert(const std::string& data) {
           for (int k = 0; k < trip_update.stop_time_update_size(); ++k) {
             const auto& stop = trip_update.stop_time_update(k);
             if (sfmtc::bart::StationIdentifier_Name((sfmtc::bart::StationIdentifier)(stations[i].id())) == stop.stop_id()) {
+              arrival_vec.push_back({line, stop.arrival().time()});
+            }
+          }
+        } else if (agencyCode == "SF") {
+          const auto line = sfmtc::muni::line_of(trip_update);
+          for (int k = 0; k < trip_update.stop_time_update_size(); ++k) {
+            const auto& stop = trip_update.stop_time_update(k);
+            if (sfmtc::muni::StationIdentifier_Name((sfmtc::muni::StationIdentifier)(stations[i].id())) == stop.stop_id()) {
               arrival_vec.push_back({line, stop.arrival().time()});
             }
           }

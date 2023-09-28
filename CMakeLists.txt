@@ -70,12 +70,6 @@ add_library(transit-base INTERFACE)
 target_include_directories(transit-base INTERFACE transit_base/include)
 target_link_libraries(transit-base INTERFACE nlohmann_json::nlohmann_json)
 
-# SF Muni
-add_library(sfmuni
-  sfmuni/src/converter.cpp
-)
-target_include_directories(sfmuni PUBLIC sfmuni/include transit_base/include)
-
 # BART
 FILE(GLOB_RECURSE bart-srcs bart/src/*.cpp)
 add_library(bart ${bart-srcs})
@@ -88,13 +82,18 @@ FILE(GLOB_RECURSE sfmtc-bart-srcs sfmtc/bart/src/*.cpp)
 add_library(sfmtc-bart ${sfmtc-bart-srcs})
 target_include_directories(sfmtc-bart PUBLIC sfmtc/bart/include)
 target_link_libraries(sfmtc-bart transit-base proto-objs)
+# Muni sub-library
+FILE(GLOB_RECURSE sfmtc-muni-srcs sfmtc/muni/*.cpp)
+add_library(sfmtc-muni ${sfmtc-muni-srcs})
+target_include_directories(sfmtc-muni PUBLIC sfmtc/muni/include)
+target_link_libraries(sfmtc-muni transit-base proto-objs)
 
 FILE(GLOB_RECURSE sfmtc-srcs sfmtc/common/src/*.cpp)
 add_library(sfmtc ${sfmtc-srcs})
 target_include_directories(sfmtc PUBLIC sfmtc/common/include)
 target_compile_definitions(sfmtc PRIVATE -DAPI_KEY_511=${API_KEY_511})
 add_dependencies(sfmtc transit-base curl-transfer proto-objs)
-target_link_libraries(sfmtc PUBLIC transit-base sfmtc-bart curl-transfer proto-objs)
+target_link_libraries(sfmtc PUBLIC transit-base sfmtc-bart sfmtc-muni curl-transfer proto-objs)
 
 # Event loop and core code
 FILE(GLOB_RECURSE antioch-base-srcs base/src/*.cpp)

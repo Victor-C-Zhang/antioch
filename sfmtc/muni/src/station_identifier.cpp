@@ -4,7 +4,7 @@
 
 namespace sfmtc::muni {
 
-const std::string StationIdentifier_Name(const StationIdentifier id) {
+const std::string StationIdentifier_pretty_name(const StationIdentifier id) {
   switch (id) {
     case INVALID_STATION:
       return "Invalid station";
@@ -6551,9 +6551,10 @@ const std::string StationIdentifier_Name(const StationIdentifier id) {
     case _17951:
       return "Zoo Rd & Skyline Blvd";
   }
+  return "Invalid station";
 }
 
-const std::string StationIdentifier_pretty_name(const StationIdentifier id) {
+const std::string StationIdentifier_Name(const StationIdentifier id) {
   switch (id) {
     case INVALID_STATION:
       return "INVALID_STATION";
