@@ -36,7 +36,9 @@ jobs:
       
       - name: Install dependencies
         shell: bash
-        run: sudo apt-get install libcurl4-openssl-dev libsdl2-dev -y
+        run: |
+          sudo apt-get update
+          sudo apt-get install libcurl4-openssl-dev libsdl2-dev -y
 
       - name: Cache ccache binary
         id: cache-ccache-bin
@@ -73,7 +75,11 @@ jobs:
           key: ${{ matrix.config.name }}-ccache-${{ steps.ccache_cache_timestamp.outputs.timestamp }}
           restore-keys: |
             ${{ matrix.config.name }}-ccache-
-
+      - name: Populate API keys
+        shell: bash
+        run: |
+          mkdir -p build
+          echo "sample_key_511" > build/api_key_511
       - name: Configure
         shell: cmake -P {0}
         run: |

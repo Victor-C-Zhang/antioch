@@ -1,8 +1,8 @@
 // Copyright Antioch. All rights reserved.
 
-#include "bart/bart_station.h"
+#include "sfmtc/bart/bart_station.h"
 
-namespace bart {
+namespace sfmtc::bart {
 
 BartStation::BartStation(StationIdentifier id)
     : Station(antioch::transit_base::TransitAgency::BART, id) {}
@@ -17,4 +17,4 @@ std::string BartStation::pretty_name() const {
   return StationIdentifier_pretty_name((StationIdentifier)id());
 }
 
-}  // namespace bart
+}  // namespace sfmtc::bart

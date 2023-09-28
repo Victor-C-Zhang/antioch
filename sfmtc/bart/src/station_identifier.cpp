@@ -1,8 +1,8 @@
 // Copyright Antioch. All rights reserved.
 
-#include "bart/station_identifier.h"
+#include "sfmtc/bart/station_identifier.h"
 
-namespace bart {
+namespace sfmtc::bart {
 
 const std::string StationIdentifier_pretty_name(const StationIdentifier id) {
   switch (id) {
@@ -220,4 +220,4 @@ const std::string StationIdentifier_Name(const StationIdentifier id) {
   return "INVALID_STATION";
 }
 
-}  // namespace bart
+}  // namespace sfmtc::bart

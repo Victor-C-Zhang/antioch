@@ -1,8 +1,8 @@
 // Copyright Antioch. All rights reserved.
 
-#include "bart/bart_line.h"
+#include "sfmtc/bart/bart_line.h"
 
-namespace bart {
+namespace sfmtc::bart {
 
 const std::string BartLine_Name(const BartLine line) {
   switch (line) {
@@ -122,4 +122,4 @@ BartLine BartLine_Parse(const std::string& name) {
   return INVALID_LINE;
 }
 
-}  // namespace bart
+}  // namespace sfmtc::bart

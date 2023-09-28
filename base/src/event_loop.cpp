@@ -2,12 +2,14 @@
 
 #include "antioch/base/event_loop.h"
 
-#include <bart_converter.h>
+#include <bart/bart_converter.h>
+#include <sfmtc/sfmtc_converter.h>
 
 #include <iostream>
 #include <map>
 #include <thread>
 
+#include "antioch/base/config/configerator.h"
 #include "antioch/base/constants.h"
 
 namespace antioch::base {
@@ -15,7 +17,7 @@ namespace antioch::base {
 using antioch::transit_base::Converter;
 using antioch::transit_base::TransitAgency;
 
-static antioch::bart::BartStation civic_center{antioch::bart::StationIdentifier::CIVC};
+static bart::BartStation civic_center{bart::StationIdentifier::CIVC};
 EventLoop::EventLoop(std::unique_ptr<Config> cfg)
     : boot_time(std::chrono::system_clock::now()),
     config(std::move(cfg)) {
@@ -48,14 +50,14 @@ void EventLoop::init_from_config(const antioch::base::Config*) {
     switch (station.agency()) {
       case TransitAgency::BART: {
         if (staging.find(TransitAgency::BART) == staging.end()) {
-          staging[TransitAgency::BART] = new antioch::bart::BartConverter();
+          staging[TransitAgency::BART] = sfmtc::SfmtcConverter::instance();
         }
         staging[TransitAgency::BART]->startTracking(station);
         break;
       }
       case TransitAgency::SF_MUNI: {
         if (staging.find(TransitAgency::SF_MUNI) == staging.end()) {
-          // TODO muni converter
+          staging[TransitAgency::SF_MUNI] = sfmtc::SfmtcConverter::instance();
         }
         staging[TransitAgency::SF_MUNI]->startTracking(station);
         break;

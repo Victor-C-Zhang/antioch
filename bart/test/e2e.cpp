@@ -10,9 +10,9 @@
 #include <mutex>
 #include <thread>
 
-#include "bart_converter.h"
+#include <bart/bart_converter.h>
 
-namespace antioch::bart {
+namespace bart {
 
 bool poor_man_latch = false;
 std::condition_variable cv;
@@ -40,12 +40,12 @@ TEST(E2E, convert) {
   std::cout << "F" << std::endl;
   auto res = bc.convert(data);
   for (const auto& station : res) {
-    std::cout << station.to_string() << std::endl;
+    std::cout << station.bart_to_string() << std::endl;
   }
 }
 
 TEST(E2E, convertFromFile) {
-  char buf[10000];
+  char buf[100000];
   std::ifstream is;
   is.open("/home/victor/temp.pb", std::ios::binary);
   is.seekg(0, std::ios::end);
@@ -57,8 +57,8 @@ TEST(E2E, convertFromFile) {
   bc.startTracking({antioch::transit_base::TransitAgency::BART, StationIdentifier::CIVC});
   auto res = bc.convert(data);
   for (const auto& station : res) {
-    std::cout << station.to_string() << std::endl;
+    std::cout << station.bart_to_string() << std::endl;
   }
 }
 
-}  // namespace antioch::bart
+}  // namespace bart

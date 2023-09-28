@@ -5,7 +5,6 @@
 
 #include "station_identifier.h"
 
-namespace antioch {
 namespace bart {
 
 class BartStation : public antioch::transit_base::Station {
@@ -17,4 +16,3 @@ class BartStation : public antioch::transit_base::Station {
 };
 
 }  // namespace bart
-}  // namespace antioch

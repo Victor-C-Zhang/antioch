@@ -30,6 +30,9 @@ add_compile_options(-fno-rtti)
 #add_compile_options(-fsanitize=address)
 #add_link_options(-fsanitize=address)
 
+# API Key for SFMTC api.511.org
+file(STRINGS "${PROJECT_SOURCE_DIR}/build/api_key_511" API_KEY_511)
+
 # Switch dependencies and HAL impls based on product
 include(product/common.cmake)
 if(PRODUCT STREQUAL "LINUX")
@@ -74,25 +77,35 @@ add_library(sfmuni
 target_include_directories(sfmuni PUBLIC sfmuni/include transit_base/include)
 
 # BART
-add_library(bart
-  bart/src/bart_converter.cpp
-  bart/src/bart_line.cpp
-  bart/src/bart_station.cpp
-  bart/src/station_arrivals.cpp
-  bart/src/station_identifier.cpp
-)
+FILE(GLOB_RECURSE bart-srcs bart/src/*.cpp)
+add_library(bart ${bart-srcs})
 target_include_directories(bart PUBLIC bart/include)
 target_link_libraries(bart PUBLIC transit-base curl-transfer proto-objs)
+
+# SFMTC
+# BART sub-library
+FILE(GLOB_RECURSE sfmtc-bart-srcs sfmtc/bart/src/*.cpp)
+add_library(sfmtc-bart ${sfmtc-bart-srcs})
+target_include_directories(sfmtc-bart PUBLIC sfmtc/bart/include)
+target_link_libraries(sfmtc-bart transit-base proto-objs)
+
+FILE(GLOB_RECURSE sfmtc-srcs sfmtc/common/src/*.cpp)
+add_library(sfmtc ${sfmtc-srcs})
+target_include_directories(sfmtc PUBLIC sfmtc/common/include)
+target_compile_definitions(sfmtc PRIVATE -DAPI_KEY_511=${API_KEY_511})
+add_dependencies(sfmtc transit-base curl-transfer proto-objs)
+target_link_libraries(sfmtc PUBLIC transit-base sfmtc-bart curl-transfer proto-objs)
 
 # Event loop and core code
 FILE(GLOB_RECURSE antioch-base-srcs base/src/*.cpp)
 add_library(antioch-base ${antioch-base-srcs})
 target_include_directories(antioch-base PUBLIC base/include/)
-target_link_libraries(antioch-base PUBLIC
+target_link_libraries(antioch-base PUBLIC transit-base libwifi sfmtc bart nlohmann_json::nlohmann_json)
+add_dependencies(antioch-base
   transit-base
-  libwifi
   bart
-  nlohmann_json::nlohmann_json
+  sfmtc
+  libwifi
 )
 
 # main exe
@@ -101,8 +114,6 @@ add_executable(antioch
 )
 add_dependencies(antioch
   antioch-base
-  sfmuni
-  bart
 )
 target_link_libraries(antioch PRIVATE
   antioch-base
@@ -130,15 +141,23 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
   )
 
   add_executable(bart-test
-    bart/test/test_runner.cpp
     bart/test/e2e.cpp
   )
   add_dependencies(bart-test bart)
-  target_include_directories(bart-test PUBLIC
-    bart/include
-  )
   target_link_libraries(bart-test PUBLIC
     bart
+    GTest::gtest_main
+    GTest::gmock_main
+  )
+
+  FILE(GLOB_RECURSE sfmtc-test-srcs sfmtc/common/test/*.cpp)
+  add_executable(sfmtc-test ${sfmtc-test-srcs})
+  add_dependencies(sfmtc-test sfmtc)
+  target_include_directories(sfmtc-test PUBLIC
+    sfmtc/common/include
+  )
+  target_link_libraries(sfmtc-test PUBLIC
+    sfmtc
     curl-transfer
     GTest::gtest_main
   )

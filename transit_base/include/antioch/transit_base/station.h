@@ -28,5 +28,10 @@ class Station {
   NLOHMANN_DEFINE_TYPE_INTRUSIVE(Station, agency_, id_);
 };
 
+class StationInvariantViolation : public std::runtime_error {
+ public:
+  StationInvariantViolation(const std::string& what) : std::runtime_error(what) {}
+};
+
 }  // namespace transit_base
 }  // namespace antioch
