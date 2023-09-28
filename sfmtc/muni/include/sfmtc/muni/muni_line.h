@@ -82,5 +82,7 @@ const std::string MuniLine_Name(const MuniLine id);
 
 const std::string MuniLine_pretty_name(const MuniLine id);
 
+MuniLine MuniLine_Parse(const std::string& name);
+
 }  // namespace muni
 }  // namespace sfmtc

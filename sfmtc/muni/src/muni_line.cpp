@@ -2,6 +2,8 @@
 
 #include "sfmtc/muni/muni_line.h"
 
+#include <unordered_map>
+
 namespace sfmtc::muni {
 
 const std::string MuniLine_pretty_name(const MuniLine id) {
@@ -290,6 +292,28 @@ const std::string MuniLine_Name(const MuniLine id) {
       return "28R";
   }
   return "INVALID";
+}
+
+static const std::unordered_map<std::string, MuniLine> parse_map{
+    {"1", _1},      {"12", _12},    {"14", _14},    {"14R", _14R},  {"15", _15},   {"18", _18},
+    {"19", _19},    {"1X", _1X},    {"2", _2},      {"21", _21},    {"22", _22},   {"23", _23},
+    {"24", _24},    {"25", _25},    {"27", _27},    {"28", _28},    {"29", _29},   {"30", _30},
+    {"31", _31},    {"33", _33},    {"35", _35},    {"36", _36},    {"37", _37},   {"38", _38},
+    {"38R", _38R},  {"39", _39},    {"43", _43},    {"44", _44},    {"45", _45},   {"48", _48},
+    {"49", _49},    {"5", _5},      {"52", _52},    {"54", _54},    {"55", _55},   {"56", _56},
+    {"57", _57},    {"58", _58},    {"5R", _5R},    {"6", _6},      {"66", _66},   {"67", _67},
+    {"7", _7},      {"714", _714},  {"8", _8},      {"8AX", _8AX},  {"8BX", _8BX}, {"9", _9},
+    {"90", _90},    {"91", _91},    {"9R", _9R},    {"CA", CA},     {"F", F},      {"J", J},
+    {"K", K},       {"KBUS", KBUS}, {"LBUS", LBUS}, {"LOWL", LOWL}, {"M", M},      {"N", N},
+    {"NBUS", NBUS}, {"NOWL", NOWL}, {"PH", PH},     {"PM", PM},     {"S", S},      {"T", T},
+    {"TBUS", TBUS}, {"28R", _28R},
+};
+
+MuniLine MuniLine_Parse(const std::string& name) {
+  if (parse_map.find(name) == parse_map.end()) {
+    return INVALID;
+  }
+  return parse_map.at(name);
 }
 
 }  // namespace sfmtc::muni
