@@ -14,9 +14,12 @@
 namespace antioch {
 namespace base {
 
+// forward declaration
+class Service;
+
 class EventLoop {
  public:
-  EventLoop(std::unique_ptr<Config> cfg);
+  EventLoop(Service* service, std::unique_ptr<Config> cfg);
   void run();
 
  private:
@@ -26,8 +29,8 @@ class EventLoop {
   const std::chrono::time_point<std::chrono::system_clock> boot_time;
   std::chrono::time_point<std::chrono::system_clock> tick;
   std::unique_ptr<Config> config;
-  
-  std::vector<antioch::transit_base::Converter*> converters;
+  std::map<antioch::transit_base::TransitAgency, antioch::transit_base::Converter*> converters;
+  Service* service;
 };
 
 }  // namespace base

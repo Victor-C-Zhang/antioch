@@ -16,6 +16,9 @@ class Service {
   void start();
   void spin();
 
+  // for event loop
+  antioch::transit_base::Station curr_station();
+
  private:
   // starts up the graphics interface
   bool gfx_init();
@@ -26,6 +29,7 @@ class Service {
 
   void stop();
 
+  antioch::transit_base::Station* curr_station_;
   std::unique_ptr<antioch::connectivity::wifi::WifiService> wifi;
   std::unique_ptr<EventLoop> event_loop;
   std::thread looper;
