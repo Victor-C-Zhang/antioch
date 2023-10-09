@@ -2,6 +2,7 @@
 
 #include "antioch/base/event_loop.h"
 
+#include <sfmtc/bart/bart_station.h>
 #include <sfmtc/muni/muni_station.h>
 #include <sfmtc/sfmtc_converter.h>
 
@@ -18,13 +19,14 @@ namespace antioch::base {
 using antioch::transit_base::Converter;
 using antioch::transit_base::TransitAgency;
 
-EventLoop::EventLoop(Service* service, std::unique_ptr<Config> cfg)
-    : boot_time(std::chrono::system_clock::now()), config(std::move(cfg)), service(service) {
+EventLoop::EventLoop(Service* service, Config* cfg)
+    : boot_time(std::chrono::system_clock::now()), config(cfg), service(service) {
   tick = boot_time;
 }
 
 void EventLoop::run() {
-  init_from_config(config.get());
+  init_from_config(config);
+  display_new();
 
   while (1) {
     run_tick();
@@ -41,6 +43,28 @@ void EventLoop::run() {
       tick -= std::chrono::milliseconds(TRANSIT_POLL_MS);  // otherwise we will skip
     }
   }
+}
+
+void EventLoop::display_new() {
+  std::cout << "Display new" << std::endl;
+  std::string name;
+  switch (service->curr_station().agency()) {
+    case TransitAgency::BART: {
+      name = ((sfmtc::bart::BartStation)service->curr_station()).pretty_name();
+      break;
+    }
+    case TransitAgency::SF_MUNI: {
+      name = ((sfmtc::muni::MuniStation)service->curr_station()).pretty_name();
+      break;
+    }
+    case TransitAgency::INVALID: {
+      name = "INVALID AGENCY";
+      break;
+    }
+  }
+  std::cout << "New station: " << name << std::endl;
+  // TODO: display station name for at least 1 second
+  run_tick();
 }
 
 void EventLoop::init_from_config(const antioch::base::Config*) {

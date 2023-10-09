@@ -27,9 +27,13 @@ class Service {
   // TODO: init BT and app listener
   bool late_init();
 
+  // cycle through which of the home stops is displayed to UI
+  void cycle_home_stops();
+
   void stop();
 
-  antioch::transit_base::Station* curr_station_;
+  std::unique_ptr<Config> config;
+  size_t curr_station_ptr_;
   std::unique_ptr<antioch::connectivity::wifi::WifiService> wifi;
   std::unique_ptr<EventLoop> event_loop;
   std::thread looper;

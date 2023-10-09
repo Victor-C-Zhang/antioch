@@ -25,11 +25,13 @@ void Service::start() {
 }
 
 void Service::spin() {
+  // std::this_thread::sleep_for(std::chrono::seconds(30));
+  // cycle_home_stops();
   looper.join();
 }
 
 antioch::transit_base::Station Service::curr_station() {
-  return *curr_station_;
+  return config->stations[curr_station_ptr_];
 }
 
 bool Service::gfx_init() {
@@ -70,7 +72,6 @@ bool Service::late_init() {
     return false;
   }
 
-  std::unique_ptr<Config> config;
   try {
     config = std::move(Configerator::read_or_exception());
   } catch (std::exception& e) {
@@ -78,7 +79,7 @@ bool Service::late_init() {
     config = std::move(Configerator::default_config());
   }
   if (config->user_mode == UserMode::HOME_STOP) {
-    curr_station_ = &config->stations[0];
+    curr_station_ptr_ = 0;
   }
   try {
     Configerator::write_or_exception(*config);
@@ -86,9 +87,15 @@ bool Service::late_init() {
     std::cerr << "Exception writing config: " << e.what() << std::endl;
   }
 
-  event_loop = std::make_unique<EventLoop>(this, std::move(config));
+  event_loop = std::make_unique<EventLoop>(this, config.get());
   
   return true;
+}
+
+void Service::cycle_home_stops() {
+  ++curr_station_ptr_;
+  curr_station_ptr_ %= config->stations.size();
+  event_loop->display_new();
 }
 
 void Service::stop() {
