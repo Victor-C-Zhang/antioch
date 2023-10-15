@@ -16,6 +16,9 @@ class Service {
   void start();
   void spin();
 
+  // for event loop
+  antioch::transit_base::Station curr_station();
+
  private:
   // starts up the graphics interface
   bool gfx_init();
@@ -24,8 +27,13 @@ class Service {
   // TODO: init BT and app listener
   bool late_init();
 
+  // cycle through which of the home stops is displayed to UI
+  void cycle_home_stops();
+
   void stop();
 
+  std::unique_ptr<Config> config;
+  size_t curr_station_ptr_;
   std::unique_ptr<antioch::connectivity::wifi::WifiService> wifi;
   std::unique_ptr<EventLoop> event_loop;
   std::thread looper;
