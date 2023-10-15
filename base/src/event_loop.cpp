@@ -2,7 +2,8 @@
 
 #include "antioch/base/event_loop.h"
 
-#include <bart/bart_converter.h>
+#include <sfmtc/bart/bart_station.h>
+#include <sfmtc/muni/muni_station.h>
 #include <sfmtc/sfmtc_converter.h>
 
 #include <iostream>
@@ -11,21 +12,21 @@
 
 #include "antioch/base/config/configerator.h"
 #include "antioch/base/constants.h"
+#include "antioch/base/service.h"
 
 namespace antioch::base {
 
 using antioch::transit_base::Converter;
 using antioch::transit_base::TransitAgency;
 
-static bart::BartStation civic_center{bart::StationIdentifier::CIVC};
-EventLoop::EventLoop(std::unique_ptr<Config> cfg)
-    : boot_time(std::chrono::system_clock::now()),
-    config(std::move(cfg)) {
+EventLoop::EventLoop(Service* service, Config* cfg)
+    : boot_time(std::chrono::system_clock::now()), config(cfg), service(service) {
   tick = boot_time;
 }
 
 void EventLoop::run() {
-  init_from_config(config.get());
+  init_from_config(config);
+  display_new();
 
   while (1) {
     run_tick();
@@ -44,22 +45,43 @@ void EventLoop::run() {
   }
 }
 
+void EventLoop::display_new() {
+  std::cout << "Display new" << std::endl;
+  std::string name;
+  switch (service->curr_station().agency()) {
+    case TransitAgency::BART: {
+      name = ((sfmtc::bart::BartStation)service->curr_station()).pretty_name();
+      break;
+    }
+    case TransitAgency::SF_MUNI: {
+      name = ((sfmtc::muni::MuniStation)service->curr_station()).pretty_name();
+      break;
+    }
+    case TransitAgency::INVALID: {
+      name = "INVALID AGENCY";
+      break;
+    }
+  }
+  std::cout << "New station: " << name << std::endl;
+  // TODO: display station name for at least 1 second
+  run_tick();
+}
+
 void EventLoop::init_from_config(const antioch::base::Config*) {
-  std::map<TransitAgency, Converter*> staging;
   for (auto& station : config->stations) {
     switch (station.agency()) {
       case TransitAgency::BART: {
-        if (staging.find(TransitAgency::BART) == staging.end()) {
-          staging[TransitAgency::BART] = sfmtc::SfmtcConverter::instance();
+        if (converters.find(TransitAgency::BART) == converters.end()) {
+          converters[TransitAgency::BART] = sfmtc::SfmtcConverter::instance();
         }
-        staging[TransitAgency::BART]->startTracking(station);
+        converters[TransitAgency::BART]->startTracking(station);
         break;
       }
       case TransitAgency::SF_MUNI: {
-        if (staging.find(TransitAgency::SF_MUNI) == staging.end()) {
-          staging[TransitAgency::SF_MUNI] = sfmtc::SfmtcConverter::instance();
+        if (converters.find(TransitAgency::SF_MUNI) == converters.end()) {
+          converters[TransitAgency::SF_MUNI] = sfmtc::SfmtcConverter::instance();
         }
-        staging[TransitAgency::SF_MUNI]->startTracking(station);
+        converters[TransitAgency::SF_MUNI]->startTracking(station);
         break;
       }
       case TransitAgency::INVALID: {
@@ -68,18 +90,14 @@ void EventLoop::init_from_config(const antioch::base::Config*) {
       }
     }
   }
-  for (auto& [k,v] : staging) {
-    converters.push_back(v);
-  }
 }
 
 int EventLoop::run_tick() {
-  std::cout << "Run tick" <<std::endl;
-  for (auto converter : converters) {
-    std::cout << "Converter:" << std::endl;
-    std::cout << converter->get(civic_center) << std::endl;
-  }
-  std::cout << "Done run tick" <<std::endl;
+  std::cout << "Run tick" << std::endl;
+  auto station = service->curr_station();
+  std::cout << "Converter:" << std::endl;
+  std::cout << converters[station.agency()]->get(station) << std::endl;
+  std::cout << "Done run tick" << std::endl;
   return 0;
 }
 

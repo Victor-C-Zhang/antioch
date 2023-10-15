@@ -210,6 +210,7 @@ void SfmtcConverter::refresh_cache(const std::chrono::time_point<std::chrono::sy
     std::cerr << "Timed out waiting for SFMTC API fetch!" << std::endl;
     return;
   }
+  std::cout << fetched.size() << std::endl;
   auto converted = convert(fetched);
   cache.swap(converted);
   update_last_fetch(now);

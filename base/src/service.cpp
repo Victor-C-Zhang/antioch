@@ -39,6 +39,10 @@ void Service::spin() {
   looper.join();
 }
 
+antioch::transit_base::Station Service::curr_station() {
+  return config->stations[curr_station_ptr_];
+}
+
 bool Service::gfx_init() {
   return true;
 }
@@ -90,15 +94,24 @@ bool Service::late_init() {
     std::cerr << "Using default config, exception reading saved config: " << e.what() << std::endl;
     config = std::move(Configerator::default_config());
   }
+  if (config->user_mode == UserMode::HOME_STOP) {
+    curr_station_ptr_ = 0;
+  }
   try {
     Configerator::write_or_exception(*config);
   } catch (const std::exception& e) {
     std::cerr << "Exception writing config: " << e.what() << std::endl;
   }
 
-  event_loop = std::make_unique<EventLoop>(std::move(config));
+  event_loop = std::make_unique<EventLoop>(this, config.get());
   
   return true;
+}
+
+void Service::cycle_home_stops() {
+  ++curr_station_ptr_;
+  curr_station_ptr_ %= config->stations.size();
+  event_loop->display_new();
 }
 
 void Service::stop() {
