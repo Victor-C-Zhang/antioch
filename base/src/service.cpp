@@ -25,8 +25,6 @@ void Service::start() {
 }
 
 void Service::spin() {
-  // std::this_thread::sleep_for(std::chrono::seconds(30));
-  // cycle_home_stops();
   looper.join();
 }
 
