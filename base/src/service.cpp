@@ -5,12 +5,23 @@
 #include <cstdlib>
 #include <iostream>
 
+#include <hal/input.h>
+
 #include "antioch/base/config/configerator.h"
 
 namespace antioch::base {
 
 using antioch::connectivity::wifi::WifiService;
 using antioch::connectivity::wifi::WifiConnectionError;
+
+hal::input::input_callbacks input_cbs = {
+  .on_left_short_press = []() { std::cout << "left short press" << std::endl; },
+  .on_left_long_press = []() { std::cout << "left long press" << std::endl; },
+  .on_right_short_press = []() { std::cout << "right short press" << std::endl; },
+  .on_right_long_press = []() { std::cout << "right long press" << std::endl; },
+  .on_select_short_press = []() { std::cout << "select short press" << std::endl; },
+  .on_select_long_press = []() { std::cout << "select long press" << std::endl; },
+};
 
 void Service::start() {
   if (!gfx_init()) {
@@ -70,6 +81,13 @@ bool Service::late_init() {
     return false;
   }
 
+  auto input_init_res = hal::input::input_init(&input_cbs);
+  if (input_init_res != hal::input::RES_OK) {
+    std::cerr << "input_init returned nonzero code " << input_init_res << std::endl;
+    return false;
+  }
+
+  std::unique_ptr<Config> config;
   try {
     config = std::move(Configerator::read_or_exception());
   } catch (std::exception& e) {

@@ -23,7 +23,7 @@ class Service {
   // starts up the graphics interface
   bool gfx_init();
 
-  // inits wifi
+  // inits wifi, input devices, and reads config
   // TODO: init BT and app listener
   bool late_init();
 

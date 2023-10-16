@@ -37,3 +37,4 @@ protobuf_generate(
 
 ######## HALs ########
 include(${PROJECT_SOURCE_DIR}/device/linux/wifi/wifi.cmake)
+include(${PROJECT_SOURCE_DIR}/device/linux/input/input.cmake)

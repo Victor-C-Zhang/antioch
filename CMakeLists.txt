@@ -99,12 +99,13 @@ target_link_libraries(sfmtc PUBLIC transit-base sfmtc-bart sfmtc-muni curl-trans
 FILE(GLOB_RECURSE antioch-base-srcs base/src/*.cpp)
 add_library(antioch-base ${antioch-base-srcs})
 target_include_directories(antioch-base PUBLIC base/include/)
-target_link_libraries(antioch-base PUBLIC transit-base libwifi sfmtc bart nlohmann_json::nlohmann_json)
+target_link_libraries(antioch-base PUBLIC transit-base libwifi sfmtc bart input-hal nlohmann_json::nlohmann_json)
 add_dependencies(antioch-base
   transit-base
   bart
   sfmtc
   libwifi
+  input-hal
 )
 
 # main exe
