@@ -18,14 +18,14 @@ struct ColourRGB {
 };
 
 struct Vector3D {
-  uint32_t x;
-  uint32_t y;
-  uint32_t z;
+  int32_t x;
+  int32_t y;
+  int32_t z;
 };
 
 struct Vector2D {
-  uint32_t x;
-  uint32_t y;
+  int32_t x;
+  int32_t y;
 
   inline Vector2D operator+(const Vector2D& other) const {
     return {.x = x + other.x, .y = y + other.y};
@@ -36,6 +36,8 @@ struct Vector2D {
     y += other.y;
     return *this;
   }
+
+  inline Vector2D operator*(const int32_t& other) const { return {.x = x * other, .y = y * other}; }
 };
 
 struct AllocationCallback {
@@ -55,6 +57,7 @@ struct MemoryAllocateInfo {
 struct RenderTargetCreateInfo {
   Vector2D extents;
   uint32_t numChannels;
+  EdgeBehaviour edgeBehaviour;
 };
 
 struct BufferCreateInfo {

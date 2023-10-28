@@ -4,7 +4,6 @@
 
 #include <gfx/gfx.h>
 
-#include <cassert>
 #include <cstdlib>
 
 namespace antioch::gfx::common {
