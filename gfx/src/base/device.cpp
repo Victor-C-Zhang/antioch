@@ -2,8 +2,6 @@
 
 #include <gfx/gfx.h>
 
-#include <cstdio>
-
 #include "base/function_impl.h"
 #include "base/object_base.h"
 #include "common/allocation.h"
