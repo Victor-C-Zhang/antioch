@@ -1,11 +1,22 @@
 
 FILE(GLOB BASE_SRCS src/base/*.cpp)
-FILE(GLOB IMPL_SDL2_SRCS src/sdl2/*.cpp)
 
+if(ESP_PLATFORM)
+
+FILE(GLOB ESP32_SRCS src/esp32/*.cpp)
+
+idf_component_register(SRCS ${ESP32_SRCS} ${BASE_SRCS}
+                       INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/src/base/include ${CMAKE_CURRENT_SOURCE_DIR}/src/esp32/include ${CMAKE_CURRENT_SOURCE_DIR}/include
+                       REQUIRES esp32-hub75 heap)
+
+# Simulator backend
+else()
 
 add_compile_options(
   -fno-exceptions
 )
+
+FILE(GLOB IMPL_SDL2_SRCS src/sdl2/*.cpp)
 
 add_library(antioch-gfx-base-lib ${BASE_SRCS})
 target_include_directories(antioch-gfx-base-lib
@@ -35,4 +46,5 @@ endif()
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
   add_subdirectory(tests)
+endif()
 endif()
