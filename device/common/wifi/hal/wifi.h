@@ -30,6 +30,10 @@ enum wifi_err_t : uint16_t {
   // esp wifi connect
   RES_WIFI_SSID = 9, // "SSID of AP which station connects is invalid"
   RES_CONN = 10,
+
+  // handler registration
+  RES_INVALID_HANDLER_ARG = 11,
+  RES_HANDLER_OTHER = 12,
 };
 
 [[nodiscard]] wifi_err_t wifi_hal_init();

@@ -43,13 +43,12 @@ static void wifi_event_handler(void* arg, esp_event_base_t event_base, int32_t e
 }
 
 wifi_err_t wifi_hal_init() {
-  auto res = esp_netif_init();
-  res = esp_event_loop_create_default();
-  // todo error checking
+  ESP_ERROR_CHECK(esp_netif_init());
+  ESP_ERROR_CHECK(esp_event_loop_create_default());
   esp_netif_create_default_wifi_sta();
 
   auto config = WIFI_INIT_CONFIG_DEFAULT();
-  res = esp_wifi_init(&config);
+  auto res = esp_wifi_init(&config);
   if (res == ESP_ERR_NO_MEM) {
     return RES_NO_MEM;
   }
@@ -57,11 +56,28 @@ wifi_err_t wifi_hal_init() {
     return RES_INIT_OTHER;
   }
 
-  // todo error checking
   res = esp_event_handler_instance_register(WIFI_EVENT, ESP_EVENT_ANY_ID, &wifi_event_handler,
                                             nullptr, nullptr);
+  if (res == ESP_ERR_NO_MEM) {
+    return RES_NO_MEM;
+  }
+  if (res == ESP_ERR_INVALID_ARG) {
+    return RES_INVALID_HANDLER_ARG
+  }
+  if (res != ESP_OK) {
+    return RES_HANDLER_OTHER;
+  }
   res = esp_event_handler_instance_register(IP_EVENT, IP_EVENT_GOT_IP, &wifi_event_handler, nullptr,
                                             nullptr);
+  if (res == ESP_ERR_NO_MEM) {
+    return RES_NO_MEM;
+  }
+  if (res == ESP_ERR_INVALID_ARG) {
+    return RES_INVALID_HANDLER_ARG
+  }
+  if (res != ESP_OK) {
+    return RES_HANDLER_OTHER;
+  }
 
   res = esp_wifi_set_mode(WIFI_MODE_STA);
   if (res != ESP_OK) {
