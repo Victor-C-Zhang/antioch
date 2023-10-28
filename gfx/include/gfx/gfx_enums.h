@@ -15,4 +15,9 @@ enum class ImageFormat {
   eA1Uint,
 };
 
+enum class EdgeBehaviour {
+  eClamp,
+  eWrap,
+};
+
 }  // namespace antioch::gfx
