@@ -99,7 +99,6 @@ bool Service::late_init() {
     return false;
   }
 
-  std::unique_ptr<Config> config;
   try {
     config = std::move(Configerator::read_or_exception());
   } catch (std::exception& e) {
@@ -115,7 +114,7 @@ bool Service::late_init() {
     std::cerr << "Exception writing config: " << e.what() << std::endl;
   }
 
-  event_loop = std::make_unique<EventLoop>(this, config.get());
+  event_loop = std::make_unique<EventLoop>(config.get());
 
   return true;
 }

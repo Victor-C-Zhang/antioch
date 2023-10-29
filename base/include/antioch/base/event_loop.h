@@ -18,7 +18,7 @@ class Service;
 
 class EventLoop {
  public:
-  EventLoop(Service* service, Config* cfg);
+  EventLoop(Config* cfg);
   void run();
   // special handling to display new station (upon startup) or switch to a new station
   void display_new();
@@ -31,7 +31,6 @@ class EventLoop {
   std::chrono::time_point<std::chrono::system_clock> tick;
   Config* config;
   std::map<antioch::transit_base::TransitAgency, antioch::transit_base::Converter*> converters;
-  Service* service;
 };
 
 }  // namespace base
