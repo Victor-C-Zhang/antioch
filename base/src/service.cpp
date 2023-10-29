@@ -2,26 +2,42 @@
 
 #include "antioch/base/service.h"
 
+#include <hal/input.h>
+
 #include <cstdlib>
 #include <iostream>
-
-#include <hal/input.h>
 
 #include "antioch/base/config/configerator.h"
 
 namespace antioch::base {
 
-using antioch::connectivity::wifi::WifiService;
 using antioch::connectivity::wifi::WifiConnectionError;
+using antioch::connectivity::wifi::WifiService;
 
 hal::input::input_callbacks input_cbs = {
-  .on_left_short_press = []() { std::cout << "left short press" << std::endl; },
-  .on_left_long_press = []() { std::cout << "left long press" << std::endl; },
-  .on_right_short_press = []() { std::cout << "right short press" << std::endl; },
-  .on_right_long_press = []() { std::cout << "right long press" << std::endl; },
-  .on_select_short_press = []() { std::cout << "select short press" << std::endl; },
-  .on_select_long_press = []() { std::cout << "select long press" << std::endl; },
+    .on_left_short_press =
+        []() {
+          std::cout << "left short press" << std::endl;
+          Service::instance()->cycle_prev_home_stop();
+        },
+    .on_left_long_press = []() { std::cout << "left long press" << std::endl; },
+    .on_right_short_press =
+        []() {
+          std::cout << "right short press" << std::endl;
+          Service::instance()->cycle_next_home_stop();
+        },
+    .on_right_long_press = []() { std::cout << "right long press" << std::endl; },
+    .on_select_short_press = []() { std::cout << "select short press" << std::endl; },
+    .on_select_long_press = []() { std::cout << "select long press" << std::endl; },
 };
+Service* Service::singleton_instance = nullptr;
+
+Service* Service::instance() {
+  if (singleton_instance == nullptr) {
+    singleton_instance = new Service();
+  }
+  return singleton_instance;
+}
 
 void Service::start() {
   if (!gfx_init()) {
@@ -35,17 +51,13 @@ void Service::start() {
   looper = std::thread(&EventLoop::run, event_loop.get());
 }
 
-void Service::spin() {
-  looper.join();
-}
+void Service::spin() { looper.join(); }
 
 antioch::transit_base::Station Service::curr_station() {
   return config->stations[curr_station_ptr_];
 }
 
-bool Service::gfx_init() {
-  return true;
-}
+bool Service::gfx_init() { return true; }
 
 bool Service::late_init() {
   try {
@@ -104,12 +116,18 @@ bool Service::late_init() {
   }
 
   event_loop = std::make_unique<EventLoop>(this, config.get());
-  
+
   return true;
 }
 
-void Service::cycle_home_stops() {
+void Service::cycle_next_home_stop() {
   ++curr_station_ptr_;
+  curr_station_ptr_ %= config->stations.size();
+  event_loop->display_new();
+}
+
+void Service::cycle_prev_home_stop() {
+  curr_station_ptr_ += config->stations.size() - 1;
   curr_station_ptr_ %= config->stations.size();
   event_loop->display_new();
 }

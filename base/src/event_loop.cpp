@@ -50,10 +50,12 @@ void EventLoop::display_new() {
   std::string name;
   switch (service->curr_station().agency()) {
     case TransitAgency::BART: {
+      std::cout << "E bart" << std::endl;
       name = ((sfmtc::bart::BartStation)service->curr_station()).pretty_name();
       break;
     }
     case TransitAgency::SF_MUNI: {
+      std::cout << "E muni" << std::endl;
       name = ((sfmtc::muni::MuniStation)service->curr_station()).pretty_name();
       break;
     }
