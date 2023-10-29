@@ -2,13 +2,14 @@ cmake_minimum_required(VERSION 3.16)
 
 if(ESP_PLATFORM)
 
-set(EXTRA_COMPONENT_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/espgazer" "${CMAKE_CURRENT_SOURCE_DIR}/fw" "${CMAKE_CURRENT_SOURCE_DIR}/gfx")
+set(EXTRA_COMPONENT_DIRS
+  "${CMAKE_CURRENT_SOURCE_DIR}/espgazer"
+  "${CMAKE_CURRENT_SOURCE_DIR}/fw"
+  "${CMAKE_CURRENT_SOURCE_DIR}/gfx")
 
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 
-project(antioch)
-
-else()
+endif()
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -39,11 +40,10 @@ add_compile_options(-fno-rtti)
 #add_compile_options(-fsanitize=address)
 #add_link_options(-fsanitize=address)
 
-# API Key for SFMTC api.511.org
-file(STRINGS "${PROJECT_SOURCE_DIR}/build/api_key_511" API_KEY_511)
+if(NOT ESP_PLATFORM)
 
-# Switch dependencies and HAL impls based on product
 include(product/common.cmake)
+# Switch dependencies and HAL impls based on product
 if(PRODUCT STREQUAL "LINUX")
   include(product/linux.cmake)
 elseif(PRODUCT STREQUAL "RPI3")
@@ -51,6 +51,9 @@ elseif(PRODUCT STREQUAL "RPI3")
 else()
   message(FATAL_ERROR "${PRODUCT} PRODUCT variable not supported. Aborting.")
 endif()
+
+# API Key for SFMTC api.511.org
+file(STRINGS "${PROJECT_SOURCE_DIR}/build/api_key_511" API_KEY_511)
 
 add_subdirectory(gfx)
 
@@ -129,7 +132,7 @@ target_link_libraries(antioch PRIVATE
 )
 
 
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+if(CMAKE_BUILD_TYPE STREQUAL "Debug" AND NOT ESP_PLATFORM)
 ###############################################################
 ############################ Tests ############################
 ###############################################################

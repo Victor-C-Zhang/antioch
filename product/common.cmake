@@ -1,6 +1,6 @@
 include (FetchContent)
 
-if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+if (CMAKE_BUILD_TYPE STREQUAL "Debug" AND NOT ESP_PLATFORM)
     message("Installing common dependencies: json, gtest")
 else()
     message("Installing common dependencies: json")
@@ -11,7 +11,7 @@ FetchContent_Declare(json
 )
 FetchContent_MakeAvailable(json)
 
-if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+if (CMAKE_BUILD_TYPE STREQUAL "Debug" AND NOT ESP_PLATFORM)
   enable_testing()
   FetchContent_Declare(
     googletest
