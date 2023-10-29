@@ -22,6 +22,7 @@ using namespace antioch::gfx;
 #define CHECK_ERROR(expr)         \
   if (expr != Result::eSuccess) { \
     printf("%s failed\n", #expr); \
+    abort();                      \
   }
 
 extern "C" void app_main(void) {
