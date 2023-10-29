@@ -181,6 +181,7 @@ std::vector<StationArrivals> SfmtcConverter::convert(const std::string& data) {
           }
         }
       }
+      std::sort(arrival_vec.begin(), arrival_vec.end());
       trains.emplace_back(stations[i], std::move(arrival_vec));
     }
     return trains;
