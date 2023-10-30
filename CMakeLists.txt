@@ -1,11 +1,16 @@
 cmake_minimum_required(VERSION 3.16)
 
+# API Key for SFMTC api.511.org
+# should be in antioch build dir
+file(STRINGS "${CMAKE_CURRENT_SOURCE_DIR}/build/api_key_511" API_KEY_511)
+
 if(ESP_PLATFORM)
 
 set(EXTRA_COMPONENT_DIRS
   "${CMAKE_CURRENT_SOURCE_DIR}/espgazer"
   "${CMAKE_CURRENT_SOURCE_DIR}/fw"
-  "${CMAKE_CURRENT_SOURCE_DIR}/gfx")
+  "${CMAKE_CURRENT_SOURCE_DIR}/gfx"
+  "${CMAKE_CURRENT_SOURCE_DIR}/esp_components")
 
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 
@@ -35,14 +40,15 @@ else()
   message(STATUS "${CMAKE_CXX_COMPILER_ID} not recognized, no flags added")
 endif()
 
-add_compile_options(-fno-rtti)
+include(product/common.cmake)
 
 #add_compile_options(-fsanitize=address)
 #add_link_options(-fsanitize=address)
 
 if(NOT ESP_PLATFORM)
 
-include(product/common.cmake)
+add_compile_options(-fno-rtti)
+
 # Switch dependencies and HAL impls based on product
 if(PRODUCT STREQUAL "LINUX")
   include(product/linux.cmake)
@@ -51,9 +57,6 @@ elseif(PRODUCT STREQUAL "RPI3")
 else()
   message(FATAL_ERROR "${PRODUCT} PRODUCT variable not supported. Aborting.")
 endif()
-
-# API Key for SFMTC api.511.org
-file(STRINGS "${PROJECT_SOURCE_DIR}/build/api_key_511" API_KEY_511)
 
 add_subdirectory(gfx)
 
