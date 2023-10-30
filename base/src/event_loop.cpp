@@ -19,8 +19,8 @@ namespace antioch::base {
 using antioch::transit_base::Converter;
 using antioch::transit_base::TransitAgency;
 
-EventLoop::EventLoop(Service* service, Config* cfg)
-    : boot_time(std::chrono::system_clock::now()), config(cfg), service(service) {
+EventLoop::EventLoop(Config* cfg)
+    : boot_time(std::chrono::system_clock::now()), config(cfg) {
   tick = boot_time;
 }
 
@@ -48,13 +48,16 @@ void EventLoop::run() {
 void EventLoop::display_new() {
   std::cout << "Display new" << std::endl;
   std::string name;
-  switch (service->curr_station().agency()) {
+  auto curr_station = Service::instance()->curr_station();
+  switch (curr_station.agency()) {
     case TransitAgency::BART: {
-      name = ((sfmtc::bart::BartStation)service->curr_station()).pretty_name();
+      std::cout << "E bart" << std::endl;
+      name = ((sfmtc::bart::BartStation)curr_station).pretty_name();
       break;
     }
     case TransitAgency::SF_MUNI: {
-      name = ((sfmtc::muni::MuniStation)service->curr_station()).pretty_name();
+      std::cout << "E muni" << std::endl;
+      name = ((sfmtc::muni::MuniStation)curr_station).pretty_name();
       break;
     }
     case TransitAgency::INVALID: {
@@ -94,7 +97,7 @@ void EventLoop::init_from_config(const antioch::base::Config*) {
 
 int EventLoop::run_tick() {
   std::cout << "Run tick" << std::endl;
-  auto station = service->curr_station();
+  auto station = Service::instance()->curr_station();
   std::cout << "Converter:" << std::endl;
   std::cout << converters[station.agency()]->get(station) << std::endl;
   std::cout << "Done run tick" << std::endl;
