@@ -8,7 +8,6 @@
 #include <gfx/gfx_helpers.h>
 #include <inttypes.h>
 
-#include <cstdio>
 #include <cstring>
 #include <string>
 
@@ -20,10 +19,10 @@
 #include "sdkconfig.h"
 
 using namespace antioch::gfx;
-#define CHECK_ERROR(expr)         \
-  if (expr != Result::eSuccess) { \
-    printf("%s failed\n", #expr); \
-    abort();                      \
+#define CHECK_ERROR(expr)                       \
+  if (expr != Result::eSuccess) {               \
+    ESP_LOGE("espgazer", "%s failed\n", #expr); \
+    abort();                                    \
   }
 
 extern "C" void app_main(void) {
@@ -41,16 +40,17 @@ extern "C" void app_main(void) {
 
   unsigned major_rev = chip_info.revision / 100;
   unsigned minor_rev = chip_info.revision % 100;
-  printf("silicon revision v%d.%d, ", major_rev, minor_rev);
+  ESP_LOGI("espgazer", "silicon revision v%d.%d, ", major_rev, minor_rev);
   if (esp_flash_get_size(NULL, &flash_size) != ESP_OK) {
-    printf("Get flash size failed");
+    ESP_LOGI("espgazer", "Get flash size failed");
     return;
   }
 
-  printf("%" PRIu32 "MB %s flash\n", flash_size / (uint32_t)(1024 * 1024),
-         (chip_info.features & CHIP_FEATURE_EMB_FLASH) ? "embedded" : "external");
+  ESP_LOGI("espgazer", "%" PRIu32 "MB %s flash\n", flash_size / (uint32_t)(1024 * 1024),
+           (chip_info.features & CHIP_FEATURE_EMB_FLASH) ? "embedded" : "external");
 
-  printf("Minimum free heap size: %" PRIu32 " bytes\n", esp_get_minimum_free_heap_size());
+  ESP_LOGI("espgazer", "Minimum free heap size: %" PRIu32 " bytes\n",
+           esp_get_minimum_free_heap_size());
 
   InstanceCreateInfo instanceInfo{};
   Instance instance;
@@ -77,16 +77,13 @@ extern "C" void app_main(void) {
   DeviceMemory memory;
   CHECK_ERROR(device.allocateMemory(allocInfo, nullptr, &memory));
 
-  printf("Heap size: %" PRIu32 " bytes\n", esp_get_free_heap_size());
+  ESP_LOGI("espgazer", "Heap size: %" PRIu32 " bytes\n", esp_get_free_heap_size());
 
   uint8_t* pMemory = nullptr;
   CHECK_ERROR(device.mapMemory(memory, reinterpret_cast<void**>(&pMemory)));
   memcpy(pMemory, default_glyphs::kFonts, sizeof(default_glyphs::kFonts));
-  printf("pMemory %p\n", pMemory);
+  ESP_LOGI("espgazer", "pMemory %p\n", pMemory);
 
-  // for (uint32_t i = 0; i < sizeof(default_glyphs::kFonts); i++) {
-  //   printf("i=%" PRIu32 " v=%" PRIX32 "\n", i, (uint32_t)pMemory[i]);
-  // }
   BufferCreateInfo bufferInfo{};
   bufferInfo.size = sizeof(default_glyphs::kFonts);
 
@@ -206,10 +203,10 @@ extern "C" void app_main(void) {
   CHECK_ERROR(instance.destroy());
 
   for (int i = 10; i >= 0; i--) {
-    printf("Restarting in %d seconds...\n", i);
+    ESP_LOGI("espgazer", "Restarting in %d seconds...\n", i);
     vTaskDelay(1000 / portTICK_PERIOD_MS);
   }
-  printf("Restarting now.\n");
+  ESP_LOGI("espgazer", "Restarting now.\n");
 
   fflush(stdout);
   esp_restart();
