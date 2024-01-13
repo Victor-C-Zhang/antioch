@@ -2,6 +2,10 @@ cmake_minimum_required(VERSION 3.16)
 
 # API Key for SFMTC api.511.org
 # should be in antioch build dir
+
+# Temporary no key
+file(WRITE "${CMAKE_CURRENT_SOURCE_DIR}/build/api_key_511" "FOOBAR")
+
 file(STRINGS "${CMAKE_CURRENT_SOURCE_DIR}/build/api_key_511" API_KEY_511)
 
 if(ESP_PLATFORM)
