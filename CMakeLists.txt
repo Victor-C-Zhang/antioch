@@ -1,5 +1,14 @@
 cmake_minimum_required(VERSION 3.16)
-include (FetchContent)
+
+if(ESP_PLATFORM)
+
+set(EXTRA_COMPONENT_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/espgazer" "${CMAKE_CURRENT_SOURCE_DIR}/fw" "${CMAKE_CURRENT_SOURCE_DIR}/gfx")
+
+include($ENV{IDF_PATH}/tools/cmake/project.cmake)
+
+project(antioch)
+
+else()
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -202,4 +211,6 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
 
     target_link_libraries(sungazer PRIVATE SDL2::SDL2)
   endif()
+endif()
+
 endif()
