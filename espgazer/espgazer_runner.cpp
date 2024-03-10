@@ -25,7 +25,7 @@ using namespace antioch::gfx;
     abort();                                    \
   }
 
-extern "C" void app_main(void) {
+void gazer_main() {
   printf("Hello world!\n");
 
   /* Print chip information */
