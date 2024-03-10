@@ -1,14 +1,25 @@
 cmake_minimum_required(VERSION 3.16)
 
+# API Key for SFMTC api.511.org
+# should be in antioch project dir
+
+if (EXISTS "${PROJECT_SOURCE_DIR}/api_key_511")
+file(STRINGS "${PROJECT_SOURCE_DIR}/api_key_511" API_KEY_511)
+else()
+set(API_KEY_511 "FOOBAR")
+endif()
+
 if(ESP_PLATFORM)
 
-set(EXTRA_COMPONENT_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/espgazer" "${CMAKE_CURRENT_SOURCE_DIR}/fw" "${CMAKE_CURRENT_SOURCE_DIR}/gfx")
+set(EXTRA_COMPONENT_DIRS
+  "${CMAKE_CURRENT_SOURCE_DIR}/espgazer"
+  "${CMAKE_CURRENT_SOURCE_DIR}/fw"
+  "${CMAKE_CURRENT_SOURCE_DIR}/gfx"
+  "${CMAKE_CURRENT_SOURCE_DIR}/esp_components")
 
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 
-project(antioch)
-
-else()
+endif()
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -34,16 +45,16 @@ else()
   message(STATUS "${CMAKE_CXX_COMPILER_ID} not recognized, no flags added")
 endif()
 
-add_compile_options(-fno-rtti)
+include(product/common.cmake)
 
 #add_compile_options(-fsanitize=address)
 #add_link_options(-fsanitize=address)
 
-# API Key for SFMTC api.511.org
-file(STRINGS "${PROJECT_SOURCE_DIR}/build/api_key_511" API_KEY_511)
+if(NOT ESP_PLATFORM)
+
+add_compile_options(-fno-rtti)
 
 # Switch dependencies and HAL impls based on product
-include(product/common.cmake)
 if(PRODUCT STREQUAL "LINUX")
   include(product/linux.cmake)
 elseif(PRODUCT STREQUAL "RPI3")
@@ -129,7 +140,7 @@ target_link_libraries(antioch PRIVATE
 )
 
 
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+if(CMAKE_BUILD_TYPE STREQUAL "Debug" AND NOT ESP_PLATFORM)
 ###############################################################
 ############################ Tests ############################
 ###############################################################
